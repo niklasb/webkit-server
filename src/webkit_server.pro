@@ -31,6 +31,7 @@ HEADERS = \
   CommandParser.h \
   CommandFactory.h \
   SetProxy.h \
+  SetAttribute.h \
 
 SOURCES = \
   main.cpp \
@@ -63,6 +64,7 @@ SOURCES = \
   CommandParser.cpp \
   CommandFactory.cpp \
   SetProxy.cpp \
+  SetAttribute.cpp \
 
 RESOURCES = webkit_server.qrc
 QT += network webkit

@@ -108,6 +108,15 @@ class Capybara::Driver::Webkit
       command("SetProxy")
     end
 
+    def set_attribute(attr, value = true)
+      value = value ? "true" : "false"
+      command("SetAttribute", attr, value)
+    end
+
+    def reset_attribute(attr)
+      command("SetAttribute", attr, "reset")
+    end
+
     private
 
     def start_server
@@ -190,7 +199,7 @@ class Capybara::Driver::Webkit
 
       if result.nil?
         raise WebkitNoResponseError, "No response received from the server."
-      elsif result != 'ok' 
+      elsif result != 'ok'
         raise WebkitInvalidResponseError, read_response
       end
 

@@ -503,7 +503,7 @@ describe Capybara::Driver::Webkit do
             <form action="/" method="GET">
               <input class="watch" type="text"/>
               <input class="watch" type="password"/>
-              <input class="watch" type="email"/>              
+              <input class="watch" type="email"/>
               <textarea class="watch"></textarea>
               <input class="watch" type="checkbox"/>
               <input class="watch" type="radio"/>
@@ -1079,6 +1079,67 @@ describe Capybara::Driver::Webkit do
         subject.visit("/redirect")
         subject.find("//p").first.text.should == "finished"
       end
+    end
+  end
+
+  context 'loading with special attributes' do
+    before(:all) do
+      @requested = []
+      @app = lambda do |env|
+        params = ::Rack::Utils.parse_query(env['QUERY_STRING'])
+
+        type = params["get"]
+        @requested << type if type
+        if type == "image"
+          [200,
+            { 'Content-Type'   => 'image/jpeg',
+              'Content-Length' => "0",
+            }, [""]]
+        else
+          body = <<-HTML
+            <html>
+              <head>
+                <title>Test</title>
+              </head>
+              <body onload="onload_handler();">
+                <p id="welcome">Hello</p>
+                <img src="?get=image" />
+              </body>
+            </html>
+          HTML
+
+          [200,
+            { 'Content-Type'   => 'text/html',
+              'Content-Length' => body.size.to_s,
+            }, [body]]
+        end
+      end
+    end
+
+    before do
+      @requested.clear
+    end
+
+    it 'respects AutoLoadImages = false' do
+      subject.browser.set_attribute("AutoLoadImages", false)
+      subject.visit "/"
+      @requested.size.should == 0
+    end
+
+    it 'resets AutoLoadImages when requested explicitly' do
+      subject.browser.set_attribute("AutoLoadImages", false)
+      subject.visit "/"
+      subject.browser.reset_attribute("AutoLoadImages")
+      subject.visit "/"
+      @requested.should include "image"
+    end
+
+    it 'resets AutoLoadImages automatically on driver reset' do
+      subject.browser.set_attribute("AutoLoadImages", false)
+      subject.visit "/"
+      subject.reset!
+      subject.visit "/"
+      @requested.should include "image"
     end
   end
 end
