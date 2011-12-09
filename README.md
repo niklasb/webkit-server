@@ -44,6 +44,42 @@ In RSpec, use the :js => true flag.
 
 Take note of the transactional fixtures section of the [capybara README](https://github.com/jnicklas/capybara/blob/master/README.rdoc).
 
+Setting Webkit options
+----------------------
+
+The capybara-webkit driver allows access to some of the underlying QtWebKit's
+configuration options. You can use
+
+    # to set a flag:
+    driver.browser.set_attribute(:flag_name, true)
+
+    # to unset a flag explicitly:
+    driver.browser.set_attribute(:flag_name, false)
+
+    # to reset a flag to default:
+    driver.browser.reset_attribute(:flag_name)
+
+Supported are the flag names listed below:
+
+* `:auto_load_images`
+* `:dns_prefetch_enabled`
+* `:plugins_enabled`
+* `:private_browsing_enabled`
+* `:javascript_can_open_windows`
+* `:javascript_can_access_clipboard`
+* `:offline_storage_database_enabled`
+* `:offline_web_application_cache_enabled`
+* `:local_storage_enabled`
+* `:local_storage_database_enabled`
+* `:local_content_can_access_remote_urls`
+* `:local_content_can_access_file_urls`
+* `:accelerated_compositing_enabled`
+* `:site_specific_quirks_enabled`
+
+Please consult the [Qt documentation](http://doc.qt.nokia.com/stable/qwebsettings.html#WebAttribute-enum)
+for more information about those options. If you need more flags to be supported,
+please contact us.
+
 Contributing
 ------------
 

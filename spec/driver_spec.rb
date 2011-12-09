@@ -1212,4 +1212,65 @@ describe Capybara::Driver::Webkit do
       subject.body.should include "Congrats"
     end
   end
+
+  context 'loading with special attributes' do
+    before(:all) do
+      @requested = []
+      @app = lambda do |env|
+        params = ::Rack::Utils.parse_query(env['QUERY_STRING'])
+
+        type = params["get"]
+        @requested << type if type
+        if type == "image"
+          [200,
+            { 'Content-Type'   => 'image/jpeg',
+              'Content-Length' => "0",
+            }, [""]]
+        else
+          body = <<-HTML
+            <html>
+              <head>
+                <title>Test</title>
+              </head>
+              <body onload="onload_handler();">
+                <p id="welcome">Hello</p>
+                <img src="?get=image" />
+              </body>
+            </html>
+          HTML
+
+          [200,
+            { 'Content-Type'   => 'text/html',
+              'Content-Length' => body.size.to_s,
+            }, [body]]
+        end
+      end
+    end
+
+    before do
+      @requested.clear
+    end
+
+    it 'respects AutoLoadImages = false' do
+      subject.browser.set_attribute(:auto_load_images, false)
+      subject.visit "/"
+      @requested.size.should == 0
+    end
+
+    it 'resets AutoLoadImages when requested explicitly' do
+      subject.browser.set_attribute(:auto_load_images, false)
+      subject.visit "/"
+      subject.browser.reset_attribute(:auto_load_images)
+      subject.visit "/"
+      @requested.should include "image"
+    end
+
+    it 'resets AutoLoadImages automatically on driver reset' do
+      subject.browser.set_attribute(:auto_load_images, false)
+      subject.visit "/"
+      subject.reset!
+      subject.visit "/"
+      @requested.should include "image"
+    end
+  end
 end
