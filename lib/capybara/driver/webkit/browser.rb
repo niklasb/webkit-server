@@ -130,6 +130,14 @@ class Capybara::Driver::Webkit
       command("SetAttribute", normalize_attr(attr), "reset")
     end
 
+    def set_html(html, url=nil)
+      if url
+        command("SetHtml", html, url)
+      else
+        command("SetHtml", html)
+      end
+    end
+
     private
 
     def normalize_attr(attr)

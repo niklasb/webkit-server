@@ -33,6 +33,7 @@ HEADERS = \
   CommandFactory.h \
   SetProxy.h \
   SetAttribute.h \
+  SetHtml.h \
 
 SOURCES = \
   ConsoleMessages.cpp \
@@ -67,6 +68,7 @@ SOURCES = \
   CommandFactory.cpp \
   SetProxy.cpp \
   SetAttribute.cpp \
+  SetHtml.cpp \
 
 RESOURCES = webkit_server.qrc
 QT += network webkit
