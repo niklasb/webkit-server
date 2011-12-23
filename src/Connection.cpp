@@ -4,6 +4,20 @@
 #include "CommandParser.h"
 #include "CommandFactory.h"
 #include "Command.h"
+#include "Reset.h"
+#include "Node.h"
+#include "Url.h"
+#include "Source.h"
+#include "Evaluate.h"
+#include "Execute.h"
+#include "FrameFocus.h"
+#include "Header.h"
+#include "Render.h"
+#include "Body.h"
+#include "Status.h"
+#include "Headers.h"
+#include "SetAttribute.h"
+#include "SetHtml.h"
 
 #include <QTcpSocket>
 #include <iostream>
