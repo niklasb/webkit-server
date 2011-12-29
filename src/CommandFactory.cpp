@@ -21,6 +21,7 @@
 #include "ConsoleMessages.h"
 #include "SetAttribute.h"
 #include "SetHtml.h"
+#include "Wait.h"
 
 CommandFactory::CommandFactory(WebPage *page, QObject *parent) : QObject(parent) {
   m_page = page;

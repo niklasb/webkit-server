@@ -18,6 +18,7 @@
 #include "Headers.h"
 #include "SetAttribute.h"
 #include "SetHtml.h"
+#include "Wait.h"
 
 #include <QTcpSocket>
 #include <iostream>
