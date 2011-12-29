@@ -1,7 +1,6 @@
 #include "SetAttribute.h"
 #include "WebPage.h"
 #include <QWebSettings>
-#include <iostream>
 
 static QMap<QString, QWebSettings::WebAttribute> getAttributesByName()
 {
