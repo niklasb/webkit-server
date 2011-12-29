@@ -35,6 +35,7 @@ HEADERS = \
   SetAttribute.h \
   SetHtml.h \
   Wait.h \
+  SetViewportSize.h \
 
 SOURCES = \
   ConsoleMessages.cpp \
@@ -71,6 +72,7 @@ SOURCES = \
   SetAttribute.cpp \
   SetHtml.cpp \
   Wait.cpp \
+  SetViewportSize.cpp \
 
 RESOURCES = webkit_server.qrc
 QT += network webkit

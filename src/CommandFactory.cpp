@@ -22,6 +22,7 @@
 #include "SetAttribute.h"
 #include "SetHtml.h"
 #include "Wait.h"
+#include "SetViewportSize.h"
 
 CommandFactory::CommandFactory(WebPage *page, QObject *parent) : QObject(parent) {
   m_page = page;

@@ -19,6 +19,7 @@
 #include "SetAttribute.h"
 #include "SetHtml.h"
 #include "Wait.h"
+#include "SetViewportSize.h"
 
 #include <QTcpSocket>
 #include <iostream>
