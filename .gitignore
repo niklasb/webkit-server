@@ -3,5 +3,9 @@
 *.moc
 moc_*.cpp
 Makefile*
-src/webkit_server
 qrc_*.cpp
+/src/webkit_server
+/webkit_server
+/MANIFEST
+/dist
+/build
