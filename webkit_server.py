@@ -9,8 +9,6 @@ import socket
 import atexit
 import json
 
-from time import time
-
 # path to the `webkit_server` executable
 SERVER_EXEC = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                            'webkit_server'))
@@ -23,7 +21,7 @@ class NodeError(Exception):
 
 class SelectionMixin(object):
   """ Implements a generic XPath selection for a class
-  providing a _get_xpath_id_list and a _create_node
+  providing a _get_xpath_ids and a _create_node
   method """
 
   def xpath(self, xpath):
@@ -31,7 +29,7 @@ class SelectionMixin(object):
     current node """
 
     return [self._create_node(id)
-            for id in self._get_xpath_id_list(xpath).split(",")
+            for id in self._get_xpath_ids(xpath).split(",")
             if id]
 
 
@@ -152,7 +150,7 @@ class Node(SelectionMixin):
     """ is this node a multi-select? """
     return self.tag_name() == "select" and self["multiple"]
 
-  def _get_xpath_id_list(self, xpath):
+  def _get_xpath_ids(self, xpath):
     """ Implements a mechanism to get a list
     of node IDs for an relative XPath query """
     return self._invoke("findWithin", xpath)
@@ -306,7 +304,7 @@ class CommandsMixin(SelectionMixin):
   def _create_node(self, id):
     return Node(self, id)
 
-  def _get_xpath_id_list(self, xpath):
+  def _get_xpath_ids(self, xpath):
     """ implements a mechanism to get a list
     of node IDs for an absolute XPath query """
     return self.issue_command("Find", xpath)
