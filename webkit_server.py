@@ -20,16 +20,17 @@ class NodeError(Exception):
   """ A problem occured within a Node instance method. """
   pass
 
-class SelectionMixin:
+
+class SelectionMixin(object):
   """ Implements a generic XPath selection for a class
-  providing a _get_xpath_id_list and a get_driver
+  providing a _get_xpath_id_list and a _create_node
   method """
 
   def xpath(self, xpath):
     """ Finds another node by XPath originating at the
     current node """
 
-    return [Node(self.get_driver(), id)
+    return [self._create_node(id)
             for id in self._get_xpath_id_list(xpath).split(",")
             if id]
 
@@ -43,6 +44,7 @@ class Node(SelectionMixin):
     """ Initializes a new node with the given driver instance
     (of type CommandsMixin) and a native ID that is used to
     identify the node when communicating with the server """
+    super(Node, self).__init__()
     self.driver = driver
     self.id = id
 
@@ -150,15 +152,13 @@ class Node(SelectionMixin):
     """ is this node a multi-select? """
     return self.tag_name() == "select" and self["multiple"]
 
-  def get_driver(self):
-    """ Returns which driver should be associated
-    with a newly created node. """
-    return self.driver
-
   def _get_xpath_id_list(self, xpath):
     """ Implements a mechanism to get a list
     of node IDs for an relative XPath query """
     return self._invoke("findWithin", xpath)
+
+  def _create_node(self, id):
+    return Node(self.driver, id)
 
   def __repr__(self):
     return "<Node #%s>" % self.path()
@@ -303,8 +303,8 @@ class CommandsMixin(SelectionMixin):
   def issue_node_cmd(self, *args):
     return self.issue_command("Node", *args)
 
-  def get_driver(self):
-    return self
+  def _create_node(self, id):
+    return Node(self, id)
 
   def _get_xpath_id_list(self, xpath):
     """ implements a mechanism to get a list
@@ -320,6 +320,7 @@ class CommandsMixin(SelectionMixin):
 class WebkitNoResponseError(Exception):
   """ Raised when the Webkit server does not respond. """
   pass
+
 class WebkitInvalidResponseError(Exception):
   """ Raised when the Webkit server signaled an error. """
   pass
@@ -368,6 +369,7 @@ class Driver(CommandsMixin):
   def __init__(self):
     """ Initializes the client by connecting to our
     singleton server (starting it if necessary) """
+    super(Driver, self).__init__()
     self._sock = Server().connect()
 
   def issue_command(self, cmd, *args):
