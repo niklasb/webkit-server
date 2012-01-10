@@ -14,13 +14,13 @@ original version from thoughtbot:
 
 # Building and Installing
 
-* If you only want to build the server, you can use the provided shell script
-  `build.sh`.
-* If you want to install the Python binding, you can use `sudo python
-  setup.py install` (this also builds the server and places it into Python's
-  `site-packages` directory).
-* If you want to use the Webkit server for web scraping, please take a look at
-  [pyscrape][5].
+To install the Python binding (this also builds the server and places it into
+Python's `site-package` directory):
+
+    sudo python setup.py install
+
+If you don't need the Python bindings, you can also use the supplied `build.sh`
+shellscript to build the server only.
 
 # License
 
