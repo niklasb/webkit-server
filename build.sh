@@ -1,3 +1,4 @@
 #!/bin/sh
-qmake
-make
+
+qmake && make $MAKEFLAGS || exit $?
+cp src/webkit_server webkit_server
