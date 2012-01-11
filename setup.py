@@ -24,11 +24,11 @@ class build_server(Command):
 
 setup(name='webkit-server',
       version='0.8',
-      description='a Webkit-based in-memory browser instance',
+      description='a Webkit-based, headless browser instance',
       author='Niklas Baumstark',
       author_email='niklas.baumstark@gmail.com',
       license='MIT',
-      url='https://github.com/webkit-server',
+      url='https://github.com/niklasb/webkit-server',
       py_modules=['webkit_server'],
       cmdclass={
         'build': build,
