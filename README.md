@@ -10,9 +10,9 @@ original version from thoughtbot:
 * `SetAttribute` command to [configure certain `QWebkit` settings][2]
 * `SetHtml` command to [load custom HTML][3] into the browser (e.g. to
   execute scripts on web pages scraped by a static scraper)
-* `submit()` and `path()` methods for DOM nodes to [submit forms and get
-  an XPath of the node][4], respectively
 * `SetViewportSize` command to set the viewport size of the in-memory browser
+
+If you are interested in web scraping using this server, have a look at [dryscrape][4].
 
 # Building and Installing
 
@@ -39,5 +39,4 @@ may be redistributed under the terms specified in the LICENSE file.
  [1]: https://github.com/thoughtbot/capybara-webkit
  [2]: https://github.com/thoughtbot/capybara-webkit/pull/171
  [3]: https://github.com/thoughtbot/capybara-webkit/pull/170
- [4]: https://github.com/thoughtbot/capybara-webkit/pull/173
- [5]: https://github.com/niklasb/pyscrape
+ [4]: https://github.com/niklasb/dryscrape
