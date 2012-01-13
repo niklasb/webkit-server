@@ -15,6 +15,9 @@ class build_server(Command):
   def finalize_options(self):
     self.cwd = os.getcwd()
   def run(self):
+    if os.environ.get('READTHEDOCS', None) == 'True':
+      # won't build on readthedocs.org
+      return
     assert os.getcwd() == self.cwd, 'Must be in package root.'
     os.system('qmake && make')
     try:
