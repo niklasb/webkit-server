@@ -84,10 +84,12 @@ class Node(SelectionMixin):
     identifies the current node. """
     return self._invoke("path")
 
-  def submit(self):
-    """ Submits a form node """
+  def submit(self, wait=True):
+    """ Submits a form node. If `wait` is true, wait for the page to load
+    after this operation. """
     self.eval_script("node.submit()")
-    self.driver.wait()
+    if wait:
+      self.driver.wait()
 
   def eval_script(self, js):
     """ Evaluate arbitrary Javascript with the
