@@ -1,5 +1,5 @@
 """
-Python bindings for the webkit_server
+Python bindings for the `webkit-server <https://github.com/niklasb/webkit-server/>`_
 """
 
 import sys, os
@@ -15,13 +15,13 @@ SERVER_EXEC = os.path.abspath(os.path.join(os.path.dirname(__file__),
 
 
 class NodeError(Exception):
-  """ A problem occured within a Node instance method. """
+  """ A problem occured within a ``Node`` instance method. """
   pass
 
 
 class SelectionMixin(object):
   """ Implements a generic XPath selection for a class
-  providing a _get_xpath_ids and a _create_node
+  providing a ``_get_xpath_ids`` and a ``_create_node``
   method """
 
   def xpath(self, xpath):
@@ -40,7 +40,7 @@ class Node(SelectionMixin):
 
   def __init__(self, driver, id):
     """ Initializes a new node with the given driver instance
-    (of type CommandsMixin) and a native ID that is used to
+    (of type ``CommandsMixin``) and a native ID that is used to
     identify the node when communicating with the server """
     super(Node, self).__init__()
     self.driver = driver
@@ -89,12 +89,12 @@ class Node(SelectionMixin):
 
   def eval_script(self, js):
     """ Evaluate arbitrary Javascript with the
-    "node" variable bound to the current node """
+    ``node`` variable bound to the current node """
     return self.driver.eval_script(self._build_script(js))
 
   def exec_script(self, js):
     """ Execute arbitrary Javascript with the
-    "node" variable bound to the current node """
+    ``node`` variable bound to the current node """
     self.driver.exec_script(self._build_script(js))
 
   def _build_script(self, js):
@@ -135,15 +135,15 @@ class Node(SelectionMixin):
     return self._invoke("isAttached") == "true"
 
   def is_selected(self):
-    """ is the "selected" attribute set for this node? """
+    """ is the ``selected`` attribute set for this node? """
     return self["selected"]
 
   def is_checked(self):
-    """ is the "checked" attribute set for this node? """
+    """ is the ``checked`` attribute set for this node? """
     return self["checked"]
 
   def is_disabled(self):
-    """ is the "disabled" attribute set for this node? """
+    """ is the ``disabled`` attribute set for this node? """
     return self["disabled"]
 
   def is_multi_select(self):
@@ -166,9 +166,8 @@ class Node(SelectionMixin):
 
 
 class CommandsMixin(SelectionMixin):
-  """ A collection of commands
-  that operate on a Webkit client instance exposing a
-  "issue_command" function """
+  """ A collection of commands that operate on a
+  Webkit client instance exposing a ``issue_command`` function """
 
   def visit(self, url):
     """ Goes to a given URL """
@@ -249,22 +248,24 @@ class CommandsMixin(SelectionMixin):
     """ Sets a custom attribute for our Webkit instance.
     Possible attributes are:
 
-      * auto_load_images
-      * dns_prefetch_enabled
-      * plugins_enabled
-      * private_browsing_enabled
-      * javascript_can_open_windows
-      * javascript_can_access_clipboard
-      * offline_storage_database_enabled
-      * offline_web_application_cache_enabled
-      * local_storage_enabled
-      * local_storage_database_enabled
-      * local_content_can_access_remote_urls
-      * local_content_can_access_file_urls
-      * accelerated_compositing_enabled
-      * site_specific_quirks_enabled
+      * ``auto_load_images``
+      * ``dns_prefetch_enabled``
+      * ``plugins_enabled``
+      * ``private_browsing_enabled``
+      * ``javascript_can_open_windows``
+      * ``javascript_can_access_clipboard``
+      * ``offline_storage_database_enabled``
+      * ``offline_web_application_cache_enabled``
+      * ``local_storage_enabled``
+      * ``local_storage_database_enabled``
+      * ``local_content_can_access_remote_urls``
+      * ``local_content_can_access_file_urls``
+      * ``accelerated_compositing_enabled``
+      * ``site_specific_quirks_enabled``
 
-    For all those options, `value` must be a boolean.
+    For all those options, ``value`` must be a boolean.
+    You can find more information about these options `in the QT docs
+    <http://developer.qt.nokia.com/doc/qt-4.8/qwebsettings.html#WebAttribute-enum>`_.
     """
     value = "true" if value else "false"
     self.issue_command("SetAttribute",
@@ -310,8 +311,8 @@ class CommandsMixin(SelectionMixin):
     return self.issue_command("Find", xpath)
 
   def _normalize_attr(self, attr):
-    """ Transforms a name like auto_load_images into AutoLoadImages
-    (allow Webkit option names to blend in with Python naming) """
+    """ Transforms a name like ``auto_load_images`` into ``AutoLoadImages``
+    (allows Webkit option names to blend in with Python naming) """
     return ''.join(x.capitalize() for x in attr.split("_"))
 
 
@@ -326,7 +327,7 @@ class WebkitInvalidResponseError(Exception):
 
 class Server(object):
   """ Manages a Webkit server process. Implemented as a singleton,
-  because webkit_server can handle multiple connections! """
+  because ``webkit_server`` can handle multiple connections! """
 
   # this is a singleton!
   _instance = None
