@@ -116,10 +116,12 @@ class Node(SelectionMixin):
     else:
       raise NodeError, "Unselect not allowed."
 
-  def click(self):
-    """ Clicks the current node """
+  def click(self, wait=True):
+    """ Clicks the current node. If `wait` is true, wait for the page to load
+    after this operation. """
     self._invoke("click")
-    self.driver.wait()
+    if wait:
+      self.driver.wait()
 
   def drag_to(self, element):
     """ Drag the node to another one """
