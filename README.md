@@ -1,5 +1,7 @@
 # Overview
 
+**Author:** Niklas Baumstark
+
 A standalone version of the Webkit server included in [capybara-webkit][1].
 It includes a slim Python wrapper and the following improvements over the
 original version from thoughtbot:
@@ -21,6 +23,12 @@ Python's `site-package` directory):
 
 If you don't need the Python bindings, you can also use the supplied `build.sh`
 shellscript to build the server only.
+
+# Contact, Bugs, Contributions
+
+If you have any problems with this software, don't hesitate to open an 
+issue on Github or open a pull request or write a mail to **niklas 
+baumstark at Gmail**.
 
 # License
 
