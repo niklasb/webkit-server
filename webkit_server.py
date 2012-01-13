@@ -342,7 +342,8 @@ class Server(object):
         cls, *args, **kwargs)
     return cls._instance
 
-  def __init__(self, bin = SERVER_EXEC):
+  def __init__(self, bin = None):
+    bin = bin or SERVER_EXEC
     self._server = subprocess.Popen([bin],
                                     stdin  = subprocess.PIPE,
                                     stdout = subprocess.PIPE,
