@@ -27,7 +27,8 @@ shellscript to build the server only.
 # Contact, Bugs, Contributions
 
 If you have any problems with this software, don't hesitate to open an 
-issue on Github or open a pull request or write a mail to **niklas 
+issue on [Github](https://github.com/niklasb/webkit-server) or open a pull 
+request or write a mail to **niklas 
 baumstark at Gmail**.
 
 # License
