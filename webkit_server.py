@@ -246,6 +246,12 @@ class CommandsMixin(SelectionMixin):
             for line in self.issue_command("GetCookies").split("\n")
             if line.strip()]
 
+  def set_error_tolerant(self, tolerant=True):
+    """ Sets or unsets the error tolerance flag in the server. If this flag
+    is set, dropped requests or erroneous responses will not lead to an error!
+    """
+    self.issue_command("SetErrorTolerance", "true" if tolerant else "false")
+
   def set_attribute(self, attr, value = True):
     """ Sets a custom attribute for our Webkit instance.
     Possible attributes are:
@@ -344,7 +350,7 @@ class Server(object):
 
   def __init__(self, bin = None):
     bin = bin or SERVER_EXEC
-    self._server = subprocess.Popen([bin],
+    self._server = subprocess.Popen([bin, '--ignore-ssl-errors'],
                                     stdin  = subprocess.PIPE,
                                     stdout = subprocess.PIPE,
                                     stderr = subprocess.PIPE)

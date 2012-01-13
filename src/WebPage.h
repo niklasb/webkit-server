@@ -32,6 +32,7 @@ class WebPage : public QWebPage {
     void ignoreSslErrors(QNetworkReply *reply, const QList<QSslError> &);
     void handleUnsupportedContent(QNetworkReply *reply);
     void resetSettings();
+    void setErrorTolerant(bool errorTolerant);
 
   signals:
     void pageFinished(bool);
@@ -44,6 +45,8 @@ class WebPage : public QWebPage {
     virtual QString chooseFile(QWebFrame * parentFrame, const QString &suggestedFile);
 
   private:
+    bool m_errorTolerant;
+    QString m_error;
     QString m_capybaraJavascript;
     QString m_userAgent;
     bool m_loading;

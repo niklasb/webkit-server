@@ -7,11 +7,15 @@
 #include <QResource>
 #include <iostream>
 
-WebPage::WebPage(QObject *parent) : QWebPage(parent) {
+WebPage::WebPage(QObject *parent) :
+    QWebPage(parent),
+    m_error()
+{
   setForwardUnsupportedContent(true);
   loadJavascript();
   setUserStylesheet();
 
+  m_errorTolerant = false;
   m_loading = false;
   this->setCustomNetworkAccessManager();
 
@@ -123,11 +127,26 @@ bool WebPage::javaScriptPrompt(QWebFrame *frame, const QString &message, const Q
 
 void WebPage::loadStarted() {
   m_loading = true;
+  m_error = QString();
 }
 
 void WebPage::loadFinished(bool success) {
   m_loading = false;
-  emit pageFinished(success);
+  if (success) {
+    // page loaded successfully. If intermediate requests failed,
+    // however, this wouldn't be signalled here. To be thorough, we
+    // raise an error to prevent further problems, UNLESS the user explicitly
+    // told us to be very error tolerant (similar to a real browser)
+    emit pageFinished(m_error.isEmpty() || m_errorTolerant);
+  } else {
+    // an error occured while loading the page.
+    // If replyFinished hasn't provided an error message, we
+    // use a dummy message
+    if (m_error.isEmpty())
+      m_error = QString("Unable to load URL: ")
+                       + currentFrame()->requestedUrl().toString();
+    emit pageFinished(false);
+  }
 }
 
 bool WebPage::isLoading() const {
@@ -135,7 +154,7 @@ bool WebPage::isLoading() const {
 }
 
 QString WebPage::failureString() {
-  return QString("Unable to load URL: ") + currentFrame()->requestedUrl().toString();
+  return m_error;
 }
 
 bool WebPage::render(const QString &fileName) {
@@ -187,6 +206,17 @@ QString WebPage::getLastAttachedFileName() {
 }
 
 void WebPage::replyFinished(QNetworkReply *reply) {
+  if (reply->error() != QNetworkReply::NoError) {
+    m_error = QString("Error while loading URL %1: %2 (error code %3)")
+                        .arg(reply->url().toString())
+                        .arg(reply->errorString())
+                        .arg(reply->error());
+
+    // force loadFinished
+    this->triggerAction(QWebPage::Stop);
+    return;
+  }
+
   if (reply->url() == this->currentFrame()->url()) {
     QStringList headers;
     m_lastStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -218,6 +248,10 @@ void WebPage::resetSettings() {
   foreach (QWebSettings::WebAttribute attr, attributes_by_name) {
     settings()->resetAttribute(attr);
   }
+}
+
+void WebPage::setErrorTolerant(bool errorTolerant) {
+  this->m_errorTolerant = errorTolerant;
 }
 
 int WebPage::getLastStatus() {
