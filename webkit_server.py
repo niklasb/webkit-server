@@ -34,14 +34,16 @@ class SelectionMixin(object):
 
 
 class Node(SelectionMixin):
-  """ Represents a DOM node in our Webkit session. """
+  """ Represents a DOM node in our Webkit session.
+
+  `driver` is the associated driver instance of type ``CommandsMixin``.
+
+  `id` is the internal ID that is used to identify the node when communicating
+  with the server """
 
   BOOL_ATTRIBUTES = ["checked", "disabled", "selected", "multiple"]
 
   def __init__(self, driver, id):
-    """ Initializes a new node with the given driver instance
-    (of type ``CommandsMixin``) and a native ID that is used to
-    identify the node when communicating with the server """
     super(Node, self).__init__()
     self.driver = driver
     self.id = id
@@ -327,7 +329,10 @@ class WebkitInvalidResponseError(Exception):
 
 class Server(object):
   """ Manages a Webkit server process. Implemented as a singleton,
-  because ``webkit_server`` can handle multiple connections! """
+  because ``webkit_server`` can handle multiple connections!
+
+  If `bin` is given, the specified ``webkit_server`` binary is used instead
+  of the included one. """
 
   # this is a singleton!
   _instance = None
@@ -338,8 +343,6 @@ class Server(object):
     return cls._instance
 
   def __init__(self, bin = SERVER_EXEC):
-    """ Initializes a new server process by running the binary
-    specified or using the default one. """
     self._server = subprocess.Popen([bin],
                                     stdin  = subprocess.PIPE,
                                     stdout = subprocess.PIPE,
