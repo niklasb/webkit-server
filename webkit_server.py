@@ -116,9 +116,21 @@ class Node(SelectionMixin):
     else:
       raise NodeError, "Unselect not allowed."
 
+  def _simple_mouse_event(self, event_name):
+    """ Fires a simple mouse event such as ``mouseover``, ``mousedown`` or ``mouseup``.
+    `event_name` specifies the event to trigger. """
+    self.exec_script("""
+      var ev = document.createEvent('MouseEvents');
+      ev.initEvent(%s, true, false);
+      node.dispatchEvent(ev);
+      """ % repr(event_name))
+
   def click(self, wait=True):
     """ Clicks the current node. If `wait` is true, wait for the page to load
     after this operation. """
+    import time
+    self._simple_mouse_event('mousedown');
+    self._simple_mouse_event('mouseup');
     self._invoke("click")
     if wait:
       self.driver.wait()
