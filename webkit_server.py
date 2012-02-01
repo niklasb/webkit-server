@@ -342,12 +342,13 @@ class CommandsMixin(SelectionMixin):
 
 class WebkitNoResponseError(Exception):
   """ Raised when the Webkit server does not respond. """
-  pass
 
 class WebkitInvalidResponseError(Exception):
   """ Raised when the Webkit server signaled an error. """
-  pass
 
+
+class WebkitNoXError(Exception):
+  """ Raised when the Webkit server cannot connect to X """
 
 class Server(object):
   """ Manages a Webkit server process. Implemented as a singleton,
@@ -370,9 +371,11 @@ class Server(object):
                                     stdin  = subprocess.PIPE,
                                     stdout = subprocess.PIPE,
                                     stderr = subprocess.PIPE)
-    self._port = int(re.search("port: (\d+)",
-                               self._server.stdout.readline())
-                       .group(1))
+    output = self._server.stdout.readline()
+    try:
+      self._port = int(re.search("port: (\d+)", output).group(1))
+    except AttributeError:
+      raise WebkitNoXError("Cannot connect to X. You can try running with xvfb-run")
 
     # on program termination, kill the server instance
     atexit.register(self.kill)
