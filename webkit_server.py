@@ -351,19 +351,8 @@ class WebkitNoXError(Exception):
   """ Raised when the Webkit server cannot connect to X """
 
 class Server(object):
-  """ Manages a Webkit server process. Implemented as a singleton,
-  because ``webkit_server`` can handle multiple connections!
-
-  If `bin` is given, the specified ``webkit_server`` binary is used instead
-  of the included one. """
-
-  # this is a singleton!
-  _instance = None
-  def __new__(cls, *args, **kwargs):
-    if not cls._instance:
-      cls._instance = super(Server, cls).__new__(
-        cls, *args, **kwargs)
-    return cls._instance
+  """ Manages a Webkit server process. If `bin` is given, the specified
+  ``webkit_server`` binary is used instead of the included one. """
 
   def __init__(self, bin = None):
     bin = bin or SERVER_EXEC
@@ -391,6 +380,13 @@ class Server(object):
     sock.connect(("127.0.0.1", self._port))
     return sock
 
+default_server = None
+def get_default_server():
+  """ Get a singleton Server instance. """
+  global default_server
+  if not default_server:
+    default_server = Server()
+  return default_server
 
 class Driver(CommandsMixin):
   """ A TCP client for our Webkit server """
@@ -399,7 +395,7 @@ class Driver(CommandsMixin):
     """ Initializes the client by connecting to our
     singleton server (starting it if necessary) """
     super(Driver, self).__init__()
-    self._sock = Server().connect()
+    self._sock = get_default_server().connect()
 
   def issue_command(self, cmd, *args):
     """ Send and receive a message to/from the server """
