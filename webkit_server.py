@@ -382,7 +382,8 @@ class Server(object):
 
   def kill(self):
     """ Kill the process. """
-    self._server.terminate()
+    self._server.kill()
+    self._server.wait()
 
   def connect(self):
     """ Returns a new socket connection to this server. """
