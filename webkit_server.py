@@ -128,7 +128,6 @@ class Node(SelectionMixin):
   def click(self, wait=True):
     """ Clicks the current node. If `wait` is true, wait for the page to load
     after this operation. """
-    import time
     self._simple_mouse_event('mousedown');
     self._simple_mouse_event('mouseup');
     self._invoke("click")
@@ -340,13 +339,6 @@ class CommandsMixin(SelectionMixin):
     return ''.join(x.capitalize() for x in attr.split("_"))
 
 
-class WebkitNoResponseError(Exception):
-  """ Raised when the Webkit server does not respond. """
-
-class WebkitInvalidResponseError(Exception):
-  """ Raised when the Webkit server signaled an error. """
-
-
 class WebkitNoXError(Exception):
   """ Raised when the Webkit server cannot connect to X """
 
@@ -388,6 +380,16 @@ def get_default_server():
     default_server = Server()
   return default_server
 
+
+class NoResponseError(Exception):
+  """ Raised when the Webkit server does not respond. """
+
+class InvalidResponseError(Exception):
+  """ Raised when the Webkit server signaled an error. """
+
+class EndOfStreamError(Exception):
+  """ Raised when the Webkit server closed the connection unexpectedly. """
+
 class Driver(CommandsMixin):
   """ A TCP client for our Webkit server """
 
@@ -413,10 +415,10 @@ class Driver(CommandsMixin):
     the server """
     result = self._readline()
     if not result:
-      raise WebkitNoResponseError, "No response received from server."
+      raise NoResponseError, "No response received from server."
 
     if result != "ok":
-      raise WebkitInvalidResponseError, self._read_message()
+      raise InvalidResponseError, self._read_message()
 
     return self._read_message()
 
@@ -427,7 +429,17 @@ class Driver(CommandsMixin):
     if size == 0:
       return ""
     else:
-      return self._sock.recv(size)
+      return self._recvall(size)
+
+  def _recvall(self, size):
+    result = []
+    while size > 0:
+      data = self._sock.recv(min(8192, size))
+      if not data:
+        raise EndOfStreamError, "Unexpected end of stream."
+      result.append(data)
+      size -= len(data)
+    return ''.join(result)
 
   def _readline(self):
     """ Cheap implementation of a readline function
