@@ -16,6 +16,6 @@ class Server : public QObject {
 
   private:
     QTcpServer *m_tcp_server;
-    WebPage *m_page;
+    bool m_ignore_ssl_errors;
 };
 
