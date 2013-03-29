@@ -1,4 +1,4 @@
 TEMPLATE = subdirs
-CONFIG += ordered
+CONFIG += ordered debug
 SUBDIRS += src/webkit_server.pro
 

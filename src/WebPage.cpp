@@ -15,11 +15,12 @@ WebPage::WebPage(QObject *parent) :
   loadJavascript();
   setUserStylesheet();
 
-  m_errorTolerant = false;
+  m_errorTolerance = 0;
   m_loading = false;
   this->setCustomNetworkAccessManager();
 
   connect(this, SIGNAL(loadStarted()), this, SLOT(loadStarted()));
+  connect(this, SIGNAL(loadProgress(int)), this, SLOT(loadProgress(int)));
   connect(this, SIGNAL(loadFinished(bool)), this, SLOT(loadFinished(bool)));
   connect(this, SIGNAL(frameCreated(QWebFrame *)),
           this, SLOT(frameCreated(QWebFrame *)));
@@ -126,27 +127,37 @@ bool WebPage::javaScriptPrompt(QWebFrame *frame, const QString &message, const Q
 }
 
 void WebPage::loadStarted() {
+  std::cerr << "this = " << (void*)this << std::endl;
+  std::cerr << "loadStarted" << " URL " << currentFrame()->requestedUrl().toString().toStdString() << std::endl;
   m_loading = true;
   m_error = QString();
+  m_errorInMainFrame = false;
+}
+
+void WebPage::loadProgress(int progress) {
+  std::cerr << "loadProgress: " << progress << std::endl;
 }
 
 void WebPage::loadFinished(bool success) {
   m_loading = false;
-  if (success) {
-    // page loaded successfully. If intermediate requests failed,
-    // however, this wouldn't be signalled here. To be thorough, we
-    // raise an error to prevent further problems, UNLESS the user explicitly
-    // told us to be very error tolerant (similar to a real browser)
-    emit pageFinished(m_error.isEmpty() || m_errorTolerant);
-  } else {
-    // an error occured while loading the page.
-    // If replyFinished hasn't provided an error message, we
-    // use a dummy message
-    if (m_error.isEmpty())
-      m_error = QString("Unable to load URL: ")
-                       + currentFrame()->requestedUrl().toString();
-    emit pageFinished(false);
+  std::cerr << "loadFinished: " << (success ? "success" : "failure") << std::endl;
+  bool intermediateFailures = !m_error.isEmpty();
+
+  std::cerr << "intermediateFailures: " << !m_error.isEmpty() << std::endl;
+  bool reportSuccess = !intermediateFailures;
+  if (m_errorTolerance >= 1 && success)
+    reportSuccess = true;
+  if (m_errorTolerance >= 2 && !m_errorInMainFrame)
+    reportSuccess = true;
+  if (m_errorTolerance >= 3)
+    reportSuccess = true;
+
+  std::cerr << "loadFinished reporting " << reportSuccess << std::endl;
+  if (!reportSuccess && m_error.isEmpty()) {
+    m_error = QString("Unable to load URL: ")
+                    + currentFrame()->requestedUrl().toString();
   }
+  emit pageFinished(reportSuccess);
 }
 
 bool WebPage::isLoading() const {
@@ -206,18 +217,19 @@ QString WebPage::getLastAttachedFileName() {
 }
 
 void WebPage::replyFinished(QNetworkReply *reply) {
-  if (reply->error() != QNetworkReply::NoError) {
+  bool error = reply->error() != QNetworkReply::NoError;
+  //std::cerr << "replyFinished " << reply->url().toString().toStdString() << std::endl;
+  if (error) {
+    std::cerr << "error in replyFinished for URL: " << reply->url().toString().toStdString() << std::endl;
     m_error = QString("Error while loading URL %1: %2 (error code %3)")
                         .arg(reply->url().toString())
                         .arg(reply->errorString())
                         .arg(reply->error());
-
-    // force loadFinished
-    this->triggerAction(QWebPage::Stop);
-    return;
   }
 
   if (reply->url() == this->currentFrame()->url()) {
+    if (error)
+      m_errorInMainFrame = true;
     QStringList headers;
     m_lastStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     QList<QByteArray> list = reply->rawHeaderList();
@@ -250,8 +262,8 @@ void WebPage::resetSettings() {
   }
 }
 
-void WebPage::setErrorTolerant(bool errorTolerant) {
-  this->m_errorTolerant = errorTolerant;
+void WebPage::setErrorTolerance(int errorTolerance) {
+  this->m_errorTolerance = errorTolerance;
 }
 
 int WebPage::getLastStatus() {

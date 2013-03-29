@@ -7,6 +7,7 @@ NetworkAccessManager::NetworkAccessManager(QObject *parent):QNetworkAccessManage
 }
 
 QNetworkReply* NetworkAccessManager::createRequest(QNetworkAccessManager::Operation operation, const QNetworkRequest &request, QIODevice * outgoingData = 0) {
+  //std::cout << "createRequest URL = " << request.url().toString().toStdString() << std::endl;
   QNetworkRequest new_request(request);
   if (operation != QNetworkAccessManager::PostOperation && operation != QNetworkAccessManager::PutOperation) {
     new_request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant());

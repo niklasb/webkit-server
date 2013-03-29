@@ -16,6 +16,5 @@ class Server : public QObject {
 
   private:
     QTcpServer *m_tcp_server;
-    WebPage *m_page;
 };
 
