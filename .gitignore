@@ -1,6 +1,7 @@
 *~
 *.o
 *.moc
+*.pyc
 moc_*.cpp
 Makefile*
 qrc_*.cpp

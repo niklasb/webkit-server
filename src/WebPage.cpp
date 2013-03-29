@@ -5,6 +5,8 @@
 #include "UnsupportedContentHandler.h"
 #include "SetAttribute.h"
 #include <QResource>
+#include <QFileInfo>
+#include <QDir>
 #include <iostream>
 
 WebPage::WebPage(QObject *parent) :
