@@ -49,8 +49,6 @@ class Node(SelectionMixin):
   `node_id` is the internal ID that is used to identify the node when communicating
   with the server. """
 
-  BOOL_ATTRIBUTES = ["checked", "disabled", "selected", "multiple"]
-
   def __init__(self, client, node_id):
     super(Node, self).__init__()
     self.client = client
@@ -60,13 +58,15 @@ class Node(SelectionMixin):
     """ Returns the inner text (*not* HTML). """
     return self._invoke("text")
 
+  def get_bool_attr(self, name):
+    """ Returns the value of a boolean HTML attribute like `checked` or `disabled`
+    """
+    val = self.get_attr(name)
+    return val is not None and val.lower() in ("true", name)
+
   def get_attr(self, name):
     """ Returns the value of an attribute. """
-    value = self._invoke("attribute", name)
-    if name in self.__class__.BOOL_ATTRIBUTES:
-      return value.lower() == "true" or value == name
-    else:
-      return value
+    return self._invoke("attribute", name)
 
   def set_attr(self, name, value):
     """ Sets the value of an attribute. """
@@ -157,19 +157,19 @@ class Node(SelectionMixin):
 
   def is_selected(self):
     """ is the ``selected`` attribute set for this node? """
-    return self["selected"]
+    return self.get_bool_attr("selected")
 
   def is_checked(self):
     """ is the ``checked`` attribute set for this node? """
-    return self["checked"]
+    return self.get_bool_attr("checked")
 
   def is_disabled(self):
     """ is the ``disabled`` attribute set for this node? """
-    return self["disabled"]
+    return self.get_bool_attr("disabled")
 
   def is_multi_select(self):
     """ is this node a multi-select? """
-    return self.tag_name() == "select" and self["multiple"]
+    return self.tag_name() == "select" and self.get_bool_attr("multiple")
 
   def _get_xpath_ids(self, xpath):
     """ Implements a mechanism to get a list of node IDs for an relative XPath
