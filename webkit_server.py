@@ -278,10 +278,14 @@ class Client(SelectionMixin):
             for line in self.conn.issue_command("GetCookies").split("\n")
             if line.strip()]
 
-  def set_error_tolerant(self, tolerant=True):
-    """ Sets or unsets the error tolerance flag in the server. If this flag
-    is set, dropped requests or erroneous responses will not lead to an error! """
-    self.conn.issue_command("SetErrorTolerance", "true" if tolerant else "false")
+  def set_error_tolerance(self, tolerance=0):
+    """ Changes the error tolerance level of the server:
+
+      0 = no tolerance
+      1 = errors while loading pages in frames other than the main frame are ignored
+      2 = every loading or HTML is ignored
+    """
+    self.conn.issue_command("SetErrorTolerance", tolerance)
 
   def set_attribute(self, attr, value = True):
     """ Sets a custom attribute for our Webkit instance. Possible attributes are:
@@ -371,6 +375,9 @@ class Server(object):
     output = self._server.stdout.readline()
     try:
       self._port = int(re.search("port: (\d+)", output).group(1))
+      import os
+      self._port = int(os.getenv("WEBKIT_PORT"))
+      print "using port: %s" % self._port
     except AttributeError:
       raise NoX11Error, "Cannot connect to X. You can try running with xvfb-run."
 
@@ -465,6 +472,8 @@ class ServerConnection(object):
     res = []
     while True:
       c = self._sock.recv(1)
+      if not c:
+        raise EndOfStreamError, "Unexpected end of stream"
       if c == "\n":
         return "".join(res)
       res.append(c)
