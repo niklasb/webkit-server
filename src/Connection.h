@@ -13,6 +13,7 @@ class Connection : public QObject {
 
   public:
     Connection(QTcpSocket *socket, WebPage *page, QObject *parent = 0);
+    ~Connection();
 
   public slots:
     void commandReady(QString commandName, QStringList arguments);

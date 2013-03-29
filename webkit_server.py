@@ -321,9 +321,9 @@ class Client(SelectionMixin):
     Scripts and CSS is dynamically fetched as if the HTML had been loaded from
     the given URL. """
     if url:
-      self.conn.issue_command(html, url)
+      self.conn.issue_command('SetHtml', html, url)
     else:
-      self.conn.issue_command(html)
+      self.conn.issue_command('SetHtml', html)
 
   def set_proxy(self, host     = "localhost",
                       port     = 0,

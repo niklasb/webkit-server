@@ -6,8 +6,7 @@
 
 Server::Server(QObject *parent, bool ignoreSslErrors) : QObject(parent) {
   m_tcp_server = new QTcpServer(this);
-  m_page = new WebPage(this);
-  m_page->setIgnoreSslErrors(ignoreSslErrors);
+  m_ignore_ssl_errors = ignoreSslErrors;
 }
 
 bool Server::start() {
@@ -21,5 +20,7 @@ quint16 Server::server_port() const {
 
 void Server::handleConnection() {
   QTcpSocket *socket = m_tcp_server->nextPendingConnection();
-  new Connection(socket, m_page, this);
+  WebPage *page = new WebPage(this);
+  page->setIgnoreSslErrors(m_ignore_ssl_errors);
+  new Connection(socket, page, this);
 }

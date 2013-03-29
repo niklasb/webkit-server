@@ -22,6 +22,9 @@ Connection::Connection(QTcpSocket *socket, WebPage *page, QObject *parent) :
   connect(m_page, SIGNAL(pageFinished(bool)), this, SLOT(pendingLoadFinished(bool)));
 }
 
+Connection::~Connection() {
+  delete m_page;
+}
 
 void Connection::commandReady(QString commandName, QStringList arguments) {
   m_commandName = commandName;
