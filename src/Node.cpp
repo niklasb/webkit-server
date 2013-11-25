@@ -1,14 +1,19 @@
 #include "Node.h"
 #include "WebPage.h"
+#include "WebPageManager.h"
+#include "InvocationResult.h"
 
-Node::Node(WebPage *page, QObject *parent) : Command(page, parent) {
+Node::Node(WebPageManager *manager, QStringList &arguments, QObject *parent) : JavascriptCommand(manager, arguments, parent) {
 }
 
-void Node::start(QStringList &arguments) {
-  QStringList functionArguments(arguments);
+void Node::start() {
+  QStringList functionArguments(arguments());
   QString functionName = functionArguments.takeFirst();
-  QVariant result = page()->invokeCapybaraFunction(functionName, functionArguments);
-  QString attributeValue = result.toString();
-  emit finished(new Response(true, attributeValue));
+  InvocationResult result = page()->invokeCapybaraFunction(functionName, functionArguments);
+  finish(&result);
 }
 
+QString Node::toString() const {
+  QStringList functionArguments(arguments());
+  return QString("Node.") + functionArguments.takeFirst();
+}

@@ -1,19 +1,18 @@
 #include "Render.h"
 #include "WebPage.h"
+#include "WebPageManager.h"
 
-Render::Render(WebPage *page, QObject *parent) : Command(page, parent) {
+Render::Render(WebPageManager *manager, QStringList &arguments, QObject *parent) : SocketCommand(manager, arguments, parent) {
 }
 
-void Render::start(QStringList &arguments) {
-  QStringList functionArguments(arguments);
-  QString imagePath = functionArguments.takeFirst();
-  int     width     = functionArguments.takeFirst().toInt();
-  int     height    = functionArguments.takeFirst().toInt();
+void Render::start() {
+  QString imagePath = arguments()[0];
+  int width = arguments()[1].toInt();
+  int height = arguments()[2].toInt();
 
   QSize size(width, height);
-  page()->setViewportSize(size);
 
-  bool result = page()->render( imagePath );
+  bool result = page()->render( imagePath, size );
 
-  emit finished(new Response(result));
+  finish(result);
 }

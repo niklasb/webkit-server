@@ -1,11 +1,9 @@
 #include "CommandFactory.h"
+#include "NullCommand.h"
 #include "Visit.h"
-#include "Find.h"
-#include "Command.h"
+#include "FindXpath.h"
 #include "Reset.h"
 #include "Node.h"
-#include "Url.h"
-#include "Source.h"
 #include "Evaluate.h"
 #include "Execute.h"
 #include "FrameFocus.h"
@@ -19,17 +17,39 @@
 #include "GetCookies.h"
 #include "SetProxy.h"
 #include "ConsoleMessages.h"
+#include "CurrentUrl.h"
+#include "SetTimeout.h"
+#include "GetTimeout.h"
+#include "ResizeWindow.h"
+#include "IgnoreSslErrors.h"
+#include "SetSkipImageLoading.h"
+#include "WindowFocus.h"
+#include "GetWindowHandles.h"
+#include "GetWindowHandle.h"
+#include "WebPageManager.h"
+#include "Authenticate.h"
+#include "EnableLogging.h"
+#include "SetConfirmAction.h"
+#include "SetPromptAction.h"
+#include "SetPromptText.h"
+#include "ClearPromptText.h"
+#include "JavascriptAlertMessages.h"
+#include "JavascriptConfirmMessages.h"
+#include "JavascriptPromptMessages.h"
+#include "SetUrlBlacklist.h"
+#include "Version.h"
+#include "Title.h"
+#include "FindCss.h"
+#include "SetAttachedFile.h"
 #include "SetAttribute.h"
 #include "SetHtml.h"
 #include "Wait.h"
-#include "SetViewportSize.h"
-#include "SetErrorTolerance.h"
 
-CommandFactory::CommandFactory(WebPage *page, QObject *parent) : QObject(parent) {
-  m_page = page;
+CommandFactory::CommandFactory(WebPageManager *manager, QObject *parent) : QObject(parent) {
+  m_manager = manager;
 }
 
-Command *CommandFactory::createCommand(const char *name) {
+Command *CommandFactory::createCommand(const char *name, QStringList &arguments) {
   #include "find_command.h"
-  return NULL;
+  return new NullCommand(QString(name));
 }

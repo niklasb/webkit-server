@@ -134,7 +134,7 @@ class Node(SelectionMixin):
     this operation. """
     self._simple_mouse_event('mousedown');
     self._simple_mouse_event('mouseup');
-    self._invoke("click")
+    self._invoke("leftClick")
     if wait:
       self.client.wait()
 
@@ -174,7 +174,7 @@ class Node(SelectionMixin):
   def _get_xpath_ids(self, xpath):
     """ Implements a mechanism to get a list of node IDs for an relative XPath
     query. """
-    return self._invoke("findWithin", xpath)
+    return self._invoke("findXpathWithin", xpath)
 
   def get_node_factory(self):
     """ Returns the associated node factory. """
@@ -214,18 +214,13 @@ class Client(SelectionMixin):
     """ Returns the current DOM as HTML. """
     return self.conn.issue_command("Body")
 
-  def source(self):
-    """ Returns the source of the page as it was originally
-    served by the web server. """
-    return self.conn.issue_command("Source")
-
   def wait(self):
     """ Waits for the current page to load. """
     self.conn.issue_command("Wait")
 
   def url(self):
     """ Returns the current location. """
-    return self.conn.issue_command("Url")
+    return self.conn.issue_command("CurrentUrl")
 
   def set_header(self, key, value):
     """ Sets a HTTP header for future requests. """
@@ -259,9 +254,9 @@ class Client(SelectionMixin):
     """ Renders the current page to a PNG file (viewport size in pixels). """
     self.conn.issue_command("Render", path, width, height)
 
-  def set_viewport_size(self, width, height):
-    """ Sets the viewport size. """
-    self.conn.issue_command("SetViewportSize", width, height)
+  def resize_window(self, width, height):
+    """ Sets the viewport size of the window. """
+    self.conn.issue_command("ResizeWindow", width, height)
 
   def set_cookie(self, cookie):
     """ Sets a cookie for future requests (must be in correct cookie string
@@ -316,6 +311,10 @@ class Client(SelectionMixin):
                             self._normalize_attr(attr),
                             "reset")
 
+  def set_skip_image_loading(self, skip):
+    """ Skip to loading the images. """
+    self.conn.issue_command("SetSkipImageLoading", "true" if skip else "false")
+
   def set_html(self, html, url = None):
     """ Sets custom HTML in our Webkit session and allows to specify a fake URL.
     Scripts and CSS is dynamically fetched as if the HTML had been loaded from
@@ -324,6 +323,14 @@ class Client(SelectionMixin):
       self.conn.issue_command('SetHtml', html, url)
     else:
       self.conn.issue_command('SetHtml', html)
+
+  def set_attached_file(self, path):
+    """ Set attached file name directly, use for hidden input item  """
+    self.conn.issue_command('SetAttachedFile', path)
+
+  def ignore_ssl_errors(self):
+    """ Ignore SSL errors. """
+    self.conn.issue_command('IgnoreSslErrors')
 
   def set_proxy(self, host     = "localhost",
                       port     = 0,
@@ -347,7 +354,7 @@ class Client(SelectionMixin):
   def _get_xpath_ids(self, xpath):
     """ Implements a mechanism to get a list of node IDs for an absolute XPath
     query. """
-    return self.conn.issue_command("Find", xpath)
+    return self.conn.issue_command("FindXpath", xpath)
 
   def _normalize_attr(self, attr):
     """ Transforms a name like ``auto_load_images`` into ``AutoLoadImages``
@@ -364,7 +371,7 @@ class Server(object):
 
   def __init__(self, binary = None):
     binary = binary or SERVER_EXEC
-    self._server = subprocess.Popen([binary, '--ignore-ssl-errors'],
+    self._server = subprocess.Popen([binary],
                                     stdin  = subprocess.PIPE,
                                     stdout = subprocess.PIPE,
                                     stderr = subprocess.PIPE)

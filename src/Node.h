@@ -1,13 +1,12 @@
-#include "Command.h"
+#include "JavascriptCommand.h"
 #include <QStringList>
 
-class WebPage;
-
-class Node : public Command {
+class Node : public JavascriptCommand {
   Q_OBJECT
 
   public:
-    Node(WebPage *page, QObject *parent = 0);
-    virtual void start(QStringList &arguments);
+    Node(WebPageManager *manager, QStringList &arguments, QObject *parent = 0);
+    virtual void start();
+    virtual QString toString() const;
 };
 
