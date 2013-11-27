@@ -1,5 +1,6 @@
 #include "Server.h"
-#include <QtGui>
+#include "IgnoreDebugOutput.h"
+#include <QApplication>
 #include <iostream>
 #ifdef Q_OS_UNIX
   #include <unistd.h>
@@ -18,10 +19,8 @@ int main(int argc, char **argv) {
   app.setOrganizationName("thoughtbot, inc");
   app.setOrganizationDomain("thoughtbot.com");
 
-  QStringList args = app.arguments();
-  bool ignoreSslErrors = args.contains("--ignore-ssl-errors");
-
-  Server server(0, ignoreSslErrors);
+  ignoreDebugOutput();
+  Server server(0);
 
   if (server.start()) {
     std::cout << "Capybara-webkit server started, listening on port: " << server.server_port() << std::endl;
@@ -31,4 +30,3 @@ int main(int argc, char **argv) {
     return 1;
   }
 }
-

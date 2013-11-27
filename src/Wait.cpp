@@ -1,18 +1,16 @@
 #include "Wait.h"
-#include "Command.h"
 #include "WebPage.h"
+#include "WebPageManager.h"
 
-Wait::Wait(WebPage *page, QObject *parent)
-  : Command(page, parent)
-{ }
+Wait::Wait(WebPageManager *manager, QStringList &arguments, QObject *parent) : SocketCommand(manager, arguments, parent) {
+}
 
-void Wait::start(QStringList &arguments) {
-  Q_UNUSED(arguments);
+void Wait::start() {
   connect(page(), SIGNAL(pageFinished(bool)), this, SLOT(loadFinished(bool)));
 
   if (!page()->isLoading()) {
     disconnect(page(), SIGNAL(pageFinished(bool)), this, SLOT(loadFinished(bool)));
-    emit finished(new Response(true));
+    finish(true);
   }
 }
 
@@ -22,5 +20,5 @@ void Wait::loadFinished(bool success) {
     message = page()->failureString();
 
   disconnect(page(), SIGNAL(pageFinished(bool)), this, SLOT(loadFinished(bool)));
-  emit finished(new Response(success, message));
+  finish(success, message);
 }

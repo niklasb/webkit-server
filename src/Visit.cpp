@@ -1,21 +1,13 @@
 #include "Visit.h"
-#include "Command.h"
+#include "SocketCommand.h"
 #include "WebPage.h"
+#include "WebPageManager.h"
 
-Visit::Visit(WebPage *page, QObject *parent) : Command(page, parent) {
-  connect(page, SIGNAL(pageFinished(bool)), this, SLOT(loadFinished(bool)));
+Visit::Visit(WebPageManager *manager, QStringList &arguments, QObject *parent) : SocketCommand(manager, arguments, parent) {
 }
 
-void Visit::start(QStringList &arguments) {
-  QUrl requestedUrl = QUrl(arguments[0]);
+void Visit::start() {
+  QUrl requestedUrl = QUrl::fromEncoded(arguments()[0].toUtf8(), QUrl::TolerantMode);
   page()->currentFrame()->load(QUrl(requestedUrl));
-}
-
-void Visit::loadFinished(bool success) {
-  QString message;
-  if (!success)
-    message = page()->failureString();
-
-  disconnect(page(), SIGNAL(pageFinished(bool)), this, SLOT(loadFinished(bool)));
-  emit finished(new Response(success, message));
+  finish(true);
 }

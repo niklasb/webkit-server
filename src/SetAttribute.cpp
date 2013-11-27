@@ -43,26 +43,29 @@ static QMap<QString, QWebSettings::WebAttribute> getAttributesByName()
 const QMap<QString, QWebSettings::WebAttribute> attributes_by_name =
   getAttributesByName();
 
-SetAttribute::SetAttribute(WebPage *page, QObject *parent)
-  : Command(page, parent)
-{ }
+SetAttribute::SetAttribute(WebPageManager *manager, QStringList &arguments, QObject *parent) : SocketCommand(manager, arguments, parent) {
+}
 
-void SetAttribute::start(QStringList &arguments)
-{
-  if (!attributes_by_name.contains(arguments[0])) {
+void SetAttribute::start() {
+  if (!attributes_by_name.contains(arguments()[0])) {
     // not found
-    emit finished(new Response(false, QString("No such attribute: ") +
-                                      arguments[0]));
+    finish(false, QString("No such attribute: ") +
+                  arguments()[0]);
     return;
   }
 
-  QWebSettings::WebAttribute attr =
-    attributes_by_name[arguments[0]];
+  if (!page()->isLoading()) {
+    disconnect(page(), SIGNAL(pageFinished(bool)), this, SLOT(loadFinished(bool)));
+    finish(true);
+  }
 
-  if (arguments[1] != "reset")
-    page()->settings()->setAttribute(attr, arguments[1] != "false");
+  QWebSettings::WebAttribute attr =
+    attributes_by_name[arguments()[0]];
+
+  if (arguments()[1] != "reset")
+    page()->settings()->setAttribute(attr, arguments()[1] != "false");
   else
     page()->settings()->resetAttribute(attr);
 
-  emit finished(new Response(true));
+  finish(true);
 }

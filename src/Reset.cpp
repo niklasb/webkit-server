@@ -1,23 +1,15 @@
 #include "Reset.h"
 #include "WebPage.h"
-#include "NetworkAccessManager.h"
-#include "NetworkCookieJar.h"
+#include "WebPageManager.h"
 
-Reset::Reset(WebPage *page, QObject *parent) : Command(page, parent) {
+Reset::Reset(WebPageManager *manager, QStringList &arguments, QObject *parent) : SocketCommand(manager, arguments, parent) {
 }
 
-void Reset::start(QStringList &arguments) {
-  Q_UNUSED(arguments);
-
+void Reset::start() {
   page()->triggerAction(QWebPage::Stop);
-  page()->currentFrame()->setHtml("<html><body></body></html>");
-  page()->networkAccessManager()->setCookieJar(new NetworkCookieJar());
-  page()->setCustomNetworkAccessManager();
-  page()->setUserAgent(NULL);
-  page()->resetResponseHeaders();
-  page()->resetConsoleMessages();
-  page()->resetSettings();
 
-  emit finished(new Response(true));
+  manager()->reset();
+
+  finish(true);
 }
 

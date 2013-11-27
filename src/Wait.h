@@ -1,15 +1,12 @@
-#include "Command.h"
+#include "SocketCommand.h"
 
-class WebPage;
-
-class Wait : public Command {
+class Wait : public SocketCommand {
   Q_OBJECT
 
   public:
-    Wait(WebPage *page, QObject *parent = 0);
-    virtual void start(QStringList &arguments);
+    Wait(WebPageManager *manager, QStringList &arguments, QObject *parent = 0);
+    virtual void start();
 
   private slots:
     void loadFinished(bool success);
 };
-

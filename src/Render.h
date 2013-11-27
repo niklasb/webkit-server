@@ -1,12 +1,10 @@
-#include "Command.h"
+#include "SocketCommand.h"
 #include <QStringList>
 
-class WebPage;
-
-class Render : public Command {
+class Render : public SocketCommand {
   Q_OBJECT
 
   public:
-    Render(WebPage *page, QObject *parent = 0);
-    virtual void start(QStringList &arguments);
+    Render(WebPageManager *page, QStringList &arguments, QObject *parent = 0);
+    virtual void start();
 };

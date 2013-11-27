@@ -1,13 +1,30 @@
-#include <QString>
+#ifndef RESPONSE_H
+#define RESPONSE_H
 
-class Response {
+#include <QObject>
+#include <QString>
+#include <QByteArray>
+
+class ErrorMessage;
+
+class Response : public QObject {
+  Q_OBJECT
+
   public:
-    Response(bool success, QString message);
-    Response(bool success);
+    Response(bool success, QString message, QObject *parent = 0);
+    Response(bool success, QByteArray message, QObject *parent = 0);
+    Response(bool success, ErrorMessage *message, QObject *parent = 0);
+    Response(bool success, QObject *parent);
     bool isSuccess() const;
-    QString message() const;
+    QByteArray message() const;
+    QString toString() const;
+
+  protected:
+    QByteArray m_message;
 
   private:
     bool m_success;
-    QString m_message;
 };
+
+#endif
+

@@ -1,12 +1,11 @@
 #include "Server.h"
-#include "WebPage.h"
 #include "Connection.h"
+#include "WebPageManager.h"
 
 #include <QTcpServer>
 
-Server::Server(QObject *parent, bool ignoreSslErrors) : QObject(parent) {
+Server::Server(QObject *parent) : QObject(parent) {
   m_tcp_server = new QTcpServer(this);
-  m_ignore_ssl_errors = ignoreSslErrors;
 }
 
 bool Server::start() {
@@ -20,7 +19,5 @@ quint16 Server::server_port() const {
 
 void Server::handleConnection() {
   QTcpSocket *socket = m_tcp_server->nextPendingConnection();
-  WebPage *page = new WebPage(this);
-  page->setIgnoreSslErrors(m_ignore_ssl_errors);
-  new Connection(socket, page, this);
+  new Connection(socket, new WebPageManager(this), this);
 }
