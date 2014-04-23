@@ -39,7 +39,7 @@ void Connection::commandReady(QString commandName, QStringList arguments) {
 void Connection::startCommand() {
   m_commandWaiting = false;
   if (m_pageSuccess) {
-    m_command = m_commandFactory->createCommand(m_commandName.toAscii().constData());
+    m_command = m_commandFactory->createCommand(m_commandName.toLatin1().constData());
     if (m_command) {
       connect(m_command,
               SIGNAL(finished(Response *)),
@@ -78,7 +78,7 @@ void Connection::writeResponse(Response *response) {
 
   QByteArray messageUtf8 = response->message().toUtf8();
   QString messageLength = QString::number(messageUtf8.size()) + "\n";
-  m_socket->write(messageLength.toAscii());
+  m_socket->write(messageLength.toLatin1());
   m_socket->write(messageUtf8);
   delete response;
 }

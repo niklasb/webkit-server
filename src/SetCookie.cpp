@@ -9,7 +9,7 @@ SetCookie::SetCookie(WebPage *page, QObject *parent)
 
 void SetCookie::start(QStringList &arguments)
 {
-  QList<QNetworkCookie> cookies = QNetworkCookie::parseCookies(arguments[0].toAscii());
+  QList<QNetworkCookie> cookies = QNetworkCookie::parseCookies(arguments[0].toLatin1());
   NetworkCookieJar *jar = qobject_cast<NetworkCookieJar*>(page()
                                                           ->networkAccessManager()
                                                           ->cookieJar());
