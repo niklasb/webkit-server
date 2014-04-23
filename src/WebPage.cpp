@@ -97,7 +97,7 @@ QVariant WebPage::invokeCapybaraFunction(const char *name, QStringList &argument
 }
 
 QVariant WebPage::invokeCapybaraFunction(QString &name, QStringList &arguments) {
-  return invokeCapybaraFunction(name.toAscii().data(), arguments);
+  return invokeCapybaraFunction(name.toLatin1().data(), arguments);
 }
 
 void WebPage::javaScriptConsoleMessage(const QString &message, int lineNumber, const QString &sourceID) {
