@@ -1,14 +1,15 @@
 #include "Source.h"
+#include "NetworkAccessManager.h"
+#include "WebPageManager.h"
 #include "WebPage.h"
-#include <QNetworkReply>
 
-Source::Source(WebPage *page, QObject *parent) : Command(page, parent) {
+Source::Source(WebPageManager *manager, QStringList &arguments,
+               QObject *parent)
+  : SocketCommand(manager, arguments, parent) {
 }
 
-void Source::start(QStringList &arguments) {
-  Q_UNUSED(arguments)
-
-  QNetworkAccessManager* accessManager = page()->networkAccessManager();
+void Source::start() {
+  NetworkAccessManager* accessManager = manager()->networkAccessManager();
   QNetworkRequest request(page()->currentFrame()->url());
   reply = accessManager->get(request);
 
@@ -16,6 +17,5 @@ void Source::start(QStringList &arguments) {
 }
 
 void Source::sourceLoaded() {
-  emit finished(new Response(true, reply->readAll()));
+  finish(true, reply->readAll());
 }
-

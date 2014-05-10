@@ -1,16 +1,9 @@
-#include "Command.h"
-#include <QMap>
-#include <QString>
-#include <QWebSettings>
+#include "SocketCommand.h"
 
-extern const QMap<QString, QWebSettings::WebAttribute> attributes_by_name;
-
-class WebPage;
-
-class SetAttribute : public Command {
+class SetAttribute : public SocketCommand {
   Q_OBJECT;
 
- public:
-  SetAttribute(WebPage *page, QObject *parent = 0);
-  virtual void start(QStringList &arguments);
+  public:
+    SetAttribute(WebPageManager*, QStringList&, QObject* parent = 0);
+    virtual void start();
 };

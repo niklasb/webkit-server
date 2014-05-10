@@ -1,14 +1,13 @@
-#include "Command.h"
+#include "SocketCommand.h"
 
-class WebPage;
 class QWebFrame;
 
-class FrameFocus : public Command {
+class FrameFocus : public SocketCommand {
   Q_OBJECT
 
   public:
-    FrameFocus(WebPage *page, QObject *parent = 0);
-    virtual void start(QStringList &arguments);
+    FrameFocus(WebPageManager *, QStringList &arguments, QObject *parent = 0);
+    virtual void start();
 
   private:
     void findFrames();

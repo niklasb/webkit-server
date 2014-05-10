@@ -1,14 +1,9 @@
-#include "Command.h"
+#include "SocketCommand.h"
 
-class WebPage;
-
-class SetHtml : public Command {
+class SetHtml : public SocketCommand {
   Q_OBJECT;
 
- public:
-  SetHtml(WebPage *page, QObject *parent = 0);
-  virtual void start(QStringList &arguments);
-
- private slots:
-  void loadFinished(bool success);
+  public:
+    SetHtml(WebPageManager*, QStringList&, QObject *parent = 0);
+    virtual void start();
 };

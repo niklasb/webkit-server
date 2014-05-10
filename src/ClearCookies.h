@@ -1,11 +1,9 @@
-#include "Command.h"
+#include "SocketCommand.h"
 
-class WebPage;
-
-class ClearCookies : public Command {
+class ClearCookies : public SocketCommand {
   Q_OBJECT;
 
  public:
-  ClearCookies(WebPage *page, QObject *parent = 0);
-  virtual void start(QStringList &arguments);
+  ClearCookies(WebPageManager *, QStringList &arguments, QObject *parent = 0);
+  virtual void start();
 };

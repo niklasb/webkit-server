@@ -35,7 +35,7 @@ class build_server(_build):
     shutil.copy('src/webkit_server', self.build_platlib)
 
 setup(name='webkit-server',
-      version='0.8',
+      version='0.9',
       description='a Webkit-based, headless browser instance',
       author='Niklas Baumstark',
       author_email='niklas.baumstark@gmail.com',

@@ -1,12 +1,10 @@
-#include "Command.h"
+#include "SocketCommand.h"
 
-class WebPage;
-
-class Execute : public Command {
+class Execute : public SocketCommand {
   Q_OBJECT
 
   public:
-    Execute(WebPage *page, QObject *parent = 0);
-    virtual void start(QStringList &arguments);
+    Execute(WebPageManager *, QStringList &arguments, QObject *parent = 0);
+    virtual void start();
 };
 

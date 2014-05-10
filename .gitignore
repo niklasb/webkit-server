@@ -10,3 +10,4 @@ qrc_*.cpp
 /MANIFEST
 /dist
 /build
+/src/build

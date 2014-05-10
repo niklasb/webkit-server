@@ -2,24 +2,14 @@
 #include "WebPage.h"
 #include <QUrl>
 
-SetHtml::SetHtml(WebPage *page, QObject *parent)
-  : Command(page, parent)
+SetHtml::SetHtml(WebPageManager *manager, QStringList &arguments, QObject *parent)
+  : SocketCommand(manager, arguments, parent)
 { }
 
-void SetHtml::start(QStringList &arguments) {
-  if (arguments.size() > 1)
-    page()->currentFrame()->setHtml(arguments[0], QUrl(arguments[1]));
+void SetHtml::start() {
+  if (arguments().size() > 1)
+    page()->currentFrame()->setHtml(arguments()[0], QUrl(arguments()[1]));
   else
-    page()->currentFrame()->setHtml(arguments[0]);
-  emit finished(new Response(true));
-}
-
-void SetHtml::loadFinished(bool success) {
-  QString message;
-  if (!success)
-    message = page()->failureString();
-
-  disconnect(page(), SIGNAL(pageFinished(bool)), this,
-             SLOT(loadFinished(bool)));
-  emit finished(new Response(success, message));
+    page()->currentFrame()->setHtml(arguments()[0]);
+  finish(true);
 }

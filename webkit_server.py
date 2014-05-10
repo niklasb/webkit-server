@@ -15,13 +15,19 @@ SERVER_EXEC = os.path.abspath(os.path.join(os.path.dirname(__file__),
 
 
 class SelectionMixin(object):
-  """ Implements a generic XPath selection for a class providing a
-  ``_get_xpath_ids`` and a ``get_node_factory`` method. """
+  """ Implements a generic XPath selection for a class providing
+  ``_get_xpath_ids``, ``_get_css_ids`` and ``get_node_factory`` methods. """
 
   def xpath(self, xpath):
     """ Finds another node by XPath originating at the current node. """
     return [self.get_node_factory().create(node_id)
             for node_id in self._get_xpath_ids(xpath).split(",")
+            if node_id]
+
+  def css(self, css):
+    """ Finds another node by a CSS selector relative to the current node. """
+    return [self.get_node_factory().create(node_id)
+            for node_id in self._get_css_ids(css).split(",")
             if node_id]
 
 
@@ -89,12 +95,9 @@ class Node(SelectionMixin):
     """ Returns an XPath expression that uniquely identifies the current node. """
     return self._invoke("path")
 
-  def submit(self, wait=True):
-    """ Submits a form node. If `wait` is true, wait for the page to load after
-    this operation. """
+  def submit(self):
+    """ Submits a form node, then waits for the page to completely load. """
     self.eval_script("node.submit()")
-    if wait:
-      self.client.wait()
 
   def eval_script(self, js):
     """ Evaluate arbitrary Javascript with the ``node`` variable bound to the
@@ -120,27 +123,38 @@ class Node(SelectionMixin):
     else:
       raise NodeError, "Unselect not allowed."
 
-  def _simple_mouse_event(self, event_name):
-    """ Fires a simple mouse event such as ``mouseover``, ``mousedown`` or
-    ``mouseup``. `event_name` specifies the event to trigger. """
-    self.exec_script("""
-      var ev = document.createEvent('MouseEvents');
-      ev.initEvent(%s, true, false);
-      node.dispatchEvent(ev);
-      """ % repr(event_name))
+  def click(self):
+    """ Alias for ``left_click``. """
+    self.left_click()
 
-  def click(self, wait=True):
-    """ Clicks the current node. If `wait` is true, wait for the page to load after
-    this operation. """
-    self._simple_mouse_event('mousedown');
-    self._simple_mouse_event('mouseup');
-    self._invoke("click")
-    if wait:
-      self.client.wait()
+  def left_click(self):
+    """ Left clicks the current node, then waits for the page
+    to fully load. """
+    self._invoke("leftClick")
+
+  def right_click(self):
+    """ Right clicks the current node, then waits for the page
+    to fully load. """
+    self._invoke("rightClick")
+
+  def double_click(self):
+    """ Double clicks the current node, then waits for the page
+    to fully load. """
+    self._invoke("doubleClick")
+
+  def hover(self):
+    """ Hovers over the current node, then waits for the page
+    to fully load. """
+    self._invoke("hover")
+
+  def focus(self):
+    """ Puts the focus onto the current node, then waits for the page
+    to fully load. """
+    self._invoke("focus")
 
   def drag_to(self, element):
     """ Drag the node to another one. """
-    self._invoke("dragTo", element.id)
+    self._invoke("dragTo", element.node_id)
 
   def tag_name(self):
     """ Returns the tag name of the current node. """
@@ -174,7 +188,12 @@ class Node(SelectionMixin):
   def _get_xpath_ids(self, xpath):
     """ Implements a mechanism to get a list of node IDs for an relative XPath
     query. """
-    return self._invoke("findWithin", xpath)
+    return self._invoke("findXpathWithin", xpath)
+
+  def _get_css_ids(self, css):
+    """ Implements a mechanism to get a list of node IDs for an relative CSS
+    query. """
+    return self._invoke("findCssWithin", css)
 
   def get_node_factory(self):
     """ Returns the associated node factory. """
@@ -184,7 +203,7 @@ class Node(SelectionMixin):
     return "<Node #%s>" % self.path()
 
   def _invoke(self, cmd, *args):
-    return self.client.issue_node_cmd(cmd, self.node_id, *args)
+    return self.client.issue_node_cmd(cmd, "false", self.node_id, *args)
 
 
 class Client(SelectionMixin):
@@ -219,13 +238,9 @@ class Client(SelectionMixin):
     served by the web server. """
     return self.conn.issue_command("Source")
 
-  def wait(self):
-    """ Waits for the current page to load. """
-    self.conn.issue_command("Wait")
-
   def url(self):
     """ Returns the current location. """
-    return self.conn.issue_command("Url")
+    return self.conn.issue_command("CurrentUrl")
 
   def set_header(self, key, value):
     """ Sets a HTTP header for future requests. """
@@ -261,7 +276,7 @@ class Client(SelectionMixin):
 
   def set_viewport_size(self, width, height):
     """ Sets the viewport size. """
-    self.conn.issue_command("SetViewportSize", width, height)
+    self.conn.issue_command("ResizeWindow", width, height)
 
   def set_cookie(self, cookie):
     """ Sets a cookie for future requests (must be in correct cookie string
@@ -279,9 +294,11 @@ class Client(SelectionMixin):
             if line.strip()]
 
   def set_error_tolerant(self, tolerant=True):
-    """ Sets or unsets the error tolerance flag in the server. If this flag
-    is set, dropped requests or erroneous responses will not lead to an error! """
-    self.conn.issue_command("SetErrorTolerance", "true" if tolerant else "false")
+    """ DEPRECATED! This function is a no-op now.
+
+    Used to set or unset the error tolerance flag in the server. If this flag
+    as set, dropped requests or erroneous responses would not lead to an error. """
+    return
 
   def set_attribute(self, attr, value = True):
     """ Sets a custom attribute for our Webkit instance. Possible attributes are:
@@ -347,7 +364,12 @@ class Client(SelectionMixin):
   def _get_xpath_ids(self, xpath):
     """ Implements a mechanism to get a list of node IDs for an absolute XPath
     query. """
-    return self.conn.issue_command("Find", xpath)
+    return self.conn.issue_command("FindXpath", xpath)
+
+  def _get_css_ids(self, css):
+    """ Implements a mechanism to get a list of node IDs for an absolute CSS query
+    query. """
+    return self.conn.issue_command("FindCss", css)
 
   def _normalize_attr(self, attr):
     """ Transforms a name like ``auto_load_images`` into ``AutoLoadImages``
@@ -364,7 +386,7 @@ class Server(object):
 
   def __init__(self, binary = None):
     binary = binary or SERVER_EXEC
-    self._server = subprocess.Popen([binary, '--ignore-ssl-errors'],
+    self._server = subprocess.Popen([binary],
                                     stdin  = subprocess.PIPE,
                                     stdout = subprocess.PIPE,
                                     stderr = subprocess.PIPE)
@@ -416,6 +438,7 @@ class ServerConnection(object):
   def __init__(self, server = None):
     super(ServerConnection, self).__init__()
     self._sock = (server or get_default_server()).connect()
+    self.issue_command("IgnoreSslErrors");
 
   def issue_command(self, cmd, *args):
     """ Sends and receives a message to/from the server """

@@ -7,31 +7,30 @@ class Command;
 class Response;
 class CommandParser;
 class CommandFactory;
+class PageLoadingCommand;
+class WebPageManager;
 
 class Connection : public QObject {
   Q_OBJECT
 
   public:
-    Connection(QTcpSocket *socket, WebPage *page, QObject *parent = 0);
-    ~Connection();
+    Connection(QTcpSocket *socket, WebPageManager *manager, QObject *parent = 0);
 
   public slots:
-    void commandReady(QString commandName, QStringList arguments);
+    void commandReady(Command *command);
     void finishCommand(Response *response);
     void pendingLoadFinished(bool success);
 
   private:
-    void startCommand();
+    void startCommand(Command *);
     void writeResponse(Response *response);
+    void writePageLoadFailure();
 
     QTcpSocket *m_socket;
-    QString m_commandName;
-    Command *m_command;
-    QStringList m_arguments;
-    WebPage *m_page;
+    WebPageManager *m_manager;
     CommandParser *m_commandParser;
     CommandFactory *m_commandFactory;
     bool m_pageSuccess;
-    bool m_commandWaiting;
+    WebPage *currentPage();
 };
 
