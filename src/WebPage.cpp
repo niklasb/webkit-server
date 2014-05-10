@@ -251,8 +251,8 @@ bool WebPage::render(const QString &fileName, const QSize &minimumSize) {
   this->setViewportSize(pageSize);
   this->mainFrame()->render(&p);
 
-  QImage pointer = QImage(":/pointer.png");
-  p.drawImage(m_mousePosition, pointer);
+  //QImage pointer = QImage(":/pointer.png");
+  //p.drawImage(m_mousePosition, pointer);
 
   p.end();
   this->setViewportSize(viewportSize);
