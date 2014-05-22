@@ -259,8 +259,9 @@ Capybara = {
     node = this.nodes[index];
     type = (node.type || node.tagName).toLowerCase();
     textTypes = ["email", "number", "password", "search", "tel", "text", "textarea", "url"];
+    editable = node.contentEditable === 'true' || node.contentEditable === 'plaintext-only';
 
-    if (textTypes.indexOf(type) != -1) {
+    if (textTypes.indexOf(type) != -1 || editable) {
       this.focus(index);
 
       maxLength = this.attribute(index, "maxlength");
