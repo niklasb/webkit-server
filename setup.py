@@ -2,6 +2,7 @@ from distutils.core import setup, Command
 from distutils.command.build import build as _build
 import os, sys
 import shutil
+import platform
 
 class build_server(_build):
   description = 'custom build command'
@@ -18,7 +19,13 @@ class build_server(_build):
       # won't build on readthedocs.org
       return
     assert os.getcwd() == self.cwd, 'Must be in package root.'
-    os.system('qmake && make')
+    # append any platform specific qmake args to this list
+    QMAKEARGS=[]
+    if platform.system() == 'Darwin':
+      # ensure a Makefile is generated rather than an XCode project on OSX
+      QMAKEARGS.append('-spec macx-g++')
+    os.putenv('QMAKEARGS', ' '.join(QMAKEARGS))
+    os.system('qmake $QMAKEARGS && make')
     try:
       os.remove(os.path.join(self.build_purelib, 'webkit_server'))
     except: pass      
