@@ -20,12 +20,11 @@ class build_server(_build):
       return
     assert os.getcwd() == self.cwd, 'Must be in package root.'
     # append any platform specific qmake args to this list
-    QMAKEARGS=[]
+    args=[]
     if platform.system() == 'Darwin':
       # ensure a Makefile is generated rather than an XCode project on OSX
-      QMAKEARGS.append('-spec macx-g++')
-    os.putenv('QMAKEARGS', ' '.join(QMAKEARGS))
-    os.system('qmake $QMAKEARGS && make')
+      args += ['-spec', 'macx-g++']
+    os.system('qmake ' + ' '.join(args) + ' && make')
     try:
       os.remove(os.path.join(self.build_purelib, 'webkit_server'))
     except: pass      
