@@ -6,6 +6,6 @@ Headers::Headers(WebPageManager *manager, QStringList &arguments, QObject *paren
 }
 
 void Headers::start() {
-  finish(true, page()->pageHeaders().join("\n"));
+  finish(true, page()->pageHeaders().join("\r"));
 }
 

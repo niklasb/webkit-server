@@ -255,10 +255,14 @@ class Client(SelectionMixin):
     return int(self.conn.issue_command("Status"))
 
   def headers(self):
-    """ Returns a dict of the last HTTP response headers. """
-    return dict([tuple(header.split(": ", 1))
-                 for header in self.conn.issue_command("Headers")
-                                        .split("\n")])
+    """ Returns a list of the last HTTP response headers. """
+    headers = self.conn.issue_command("Headers")
+    res = []
+    for header in headers.split("\r"):
+      key, value = header.split(": ", 1)
+      for line in value.split("\n"):
+        res.append((key, line))
+    return res
 
   def eval_script(self, expr):
     """ Evaluates a piece of Javascript in the context of the current page and
