@@ -353,6 +353,14 @@ class Client(SelectionMixin):
     """ Sets a custom HTTP proxy to use for future requests. """
     self.conn.issue_command("SetProxy", host, port, user, password)
 
+  def set_timeout(self, timeout):
+    """ Set timeout for every webkit-server command """
+    self.conn.issue_command("SetTimeout", timeout)
+
+  def get_timeout(self):
+    """ Return timeout for every webkit-server command """
+    return int(self.conn.issue_command("GetTimeout"))
+
   def clear_proxy(self):
     """ Resets custom HTTP proxy (use none in future requests). """
     self.conn.issue_command("ClearProxy")
