@@ -354,11 +354,11 @@ class Client(SelectionMixin):
     self.conn.issue_command("SetProxy", host, port, user, password)
 
   def set_timeout(self, timeout):
-    """ Set timeout load page """
+    """ Set timeout for every webkit-server command """
     self.conn.issue_command("SetTimeout", timeout)
 
   def get_timeout(self):
-    """ Get timeout load page """
+    """ Return timeout for every webkit-server command """
     return int(self.conn.issue_command("GetTimeout"))
 
   def clear_proxy(self):
