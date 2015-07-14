@@ -13,6 +13,12 @@ import json
 SERVER_EXEC = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                            'webkit_server'))
 
+#the python3 flag
+if (sys.version_info > (3, 0)):
+    print('py3 detected')
+    py3 = True
+
+#line 399 454 487 495 502
 
 class SelectionMixin(object):
   """ Implements a generic XPath selection for a class providing
@@ -121,7 +127,7 @@ class Node(SelectionMixin):
     if self.xpath("ancestor::select")[0].is_multi_select():
       self._invoke("unselectOption")
     else:
-      raise NodeError, "Unselect not allowed."
+        raise NodeError("Unselect not allowed.")
 
   def click(self):
     """ Alias for ``left_click``. """
@@ -404,9 +410,9 @@ class Server(object):
                                     stderr = subprocess.PIPE)
     output = self._server.stdout.readline()
     try:
-      self._port = int(re.search("port: (\d+)", output).group(1))
+        self._port = int(re.search("port: (\d+)", output).group(1))
     except AttributeError:
-      raise NoX11Error, "Cannot connect to X. You can try running with xvfb-run."
+        raise NoX11Error("Cannot connect to X. You can try running with xvfb-run.")
 
     # on program termination, kill the server instance
     atexit.register(self.kill)
@@ -450,7 +456,7 @@ class ServerConnection(object):
   def __init__(self, server = None):
     super(ServerConnection, self).__init__()
     self._sock = (server or get_default_server()).connect()
-    self.issue_command("IgnoreSslErrors");
+    self.issue_command("IgnoreSslErrors")
 
   def issue_command(self, cmd, *args):
     """ Sends and receives a message to/from the server """
@@ -467,10 +473,10 @@ class ServerConnection(object):
     """ Reads a complete response packet from the server """
     result = self._readline()
     if not result:
-      raise NoResponseError, "No response received from server."
+        raise NoResponseError("No response received from server.")
 
     if result != "ok":
-      raise InvalidResponseError, self._read_message()
+        raise InvalidResponseError(self._read_message())
 
     return self._read_message()
 
@@ -487,11 +493,11 @@ class ServerConnection(object):
     case ``EndOfStreamError`` is raised). """
     result = []
     while size > 0:
-      data = self._sock.recv(min(8192, size))
-      if not data:
-        raise EndOfStreamError, "Unexpected end of stream."
-      result.append(data)
-      size -= len(data)
+        data = self._sock.recv(min(8192, size))
+        if not data:
+            raise EndOfStreamError("Unexpected end of stream.")
+        result.append(data)
+        size -= len(data)
     return ''.join(result)
 
   def _readline(self):
