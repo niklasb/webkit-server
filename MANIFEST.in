@@ -1,3 +1,3 @@
 include LICENSE README.md webkit_server.pro
-recursive-include src *.cpp *.js *.h *.qrc *.pro
+recursive-include src *.cpp *.js *.h *.qrc *.pro *.png
 recursive-exclude src moc_* qrc_*
