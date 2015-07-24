@@ -255,13 +255,21 @@ class Client(SelectionMixin):
     return int(self.conn.issue_command("Status"))
 
   def headers(self):
-    """ Returns a list of the last HTTP response headers. """
+    """ Returns a dict of the last HTTP response headers.
+
+    The key is the response header and the value is a list of response values.
+    """
     headers = self.conn.issue_command("Headers")
-    res = []
+    res = {}
     for header in headers.split("\r"):
-      key, value = header.split(": ", 1)
-      for line in value.split("\n"):
-        res.append((key, line))
+        key, value = header.split(": ", 1)
+        response_values = []
+
+        for line in value.split("\n"):
+            response_values.append(line)
+
+        res[key] = response_values
+
     return res
 
   def eval_script(self, expr):
