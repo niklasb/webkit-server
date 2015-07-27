@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 QMAKE_ARGS=
 if [ "$(uname)" == "Darwin" ]; then
