@@ -47,6 +47,7 @@ class NodeError(Exception):
   """ A problem occured within a ``Node`` instance method. """
   pass
 
+
 class Node(SelectionMixin):
   """ Represents a DOM node in our Webkit session.
 
@@ -121,7 +122,7 @@ class Node(SelectionMixin):
     if self.xpath("ancestor::select")[0].is_multi_select():
       self._invoke("unselectOption")
     else:
-      raise NodeError, "Unselect not allowed."
+      raise NodeError("Unselect not allowed.")
 
   def click(self):
     """ Alias for ``left_click``. """
@@ -206,6 +207,10 @@ class Node(SelectionMixin):
     return self.client.issue_node_cmd(cmd, "false", self.node_id, *args)
 
 
+def _normalize_header(key):
+  return "-".join(part[0].upper() + part[1:].lower() for part in key.split("-"))
+
+
 class Client(SelectionMixin):
   """ Wrappers for the webkit_server commands.
 
@@ -244,7 +249,7 @@ class Client(SelectionMixin):
 
   def set_header(self, key, value):
     """ Sets a HTTP header for future requests. """
-    self.conn.issue_command("Header", key, value)
+    self.conn.issue_command("Header", _normalize_header(key), value)
 
   def reset(self):
     """ Resets the current web session. """
@@ -255,13 +260,15 @@ class Client(SelectionMixin):
     return int(self.conn.issue_command("Status"))
 
   def headers(self):
-    """ Returns a list of the last HTTP response headers. """
+    """ Returns a list of the last HTTP response headers.
+    Header keys are normalized to capitalized form, as in `User-Agent`.
+    """
     headers = self.conn.issue_command("Headers")
     res = []
     for header in headers.split("\r"):
       key, value = header.split(": ", 1)
       for line in value.split("\n"):
-        res.append((key, line))
+        res.append((_normalize_header(key), line))
     return res
 
   def eval_script(self, expr):
@@ -389,8 +396,13 @@ class Client(SelectionMixin):
     return ''.join(x.capitalize() for x in attr.split("_"))
 
 
-class NoX11Error(Exception):
+class WebkitServerError(Exception):
+  """ Raised when the Webkit server experiences an error. """
+
+
+class NoX11Error(WebkitServerError):
   """ Raised when the Webkit server cannot connect to X. """
+
 
 class Server(object):
   """ Manages a Webkit server process. If `binary` is given, the specified
@@ -403,10 +415,16 @@ class Server(object):
                                     stdout = subprocess.PIPE,
                                     stderr = subprocess.PIPE)
     output = self._server.stdout.readline()
+
     try:
-      self._port = int(re.search("port: (\d+)", output).group(1))
+      self._port = int(re.search(b"port: (\d+)", output).group(1))
     except AttributeError:
-      raise NoX11Error, "Cannot connect to X. You can try running with xvfb-run."
+      err = self._server.stderr.read().decode("utf-8")
+      if "Could not connect to display" in err:
+        raise NoX11Error("Could not connect to X server. "
+            "Try calling dryscrape.start_xvfb() before creating a session.")
+      else:
+        raise WebkitServerError("webkit-server failed to start. Output:\n" + err)
 
     # on program termination, kill the server instance
     atexit.register(self.kill)
@@ -422,24 +440,61 @@ class Server(object):
     sock.connect(("127.0.0.1", self._port))
     return sock
 
-default_server = None
+
+_default_server = None
 def get_default_server():
   """ Returns a singleton Server instance (possibly after creating it, if it
   doesn't exist yet). """
-  global default_server
-  if not default_server:
-    default_server = Server()
-  return default_server
+  global _default_server
+  if not _default_server:
+    _default_server = Server()
+  return _default_server
 
 
 class NoResponseError(Exception):
   """ Raised when the Webkit server does not respond. """
 
+
 class InvalidResponseError(Exception):
   """ Raised when the Webkit server signaled an error. """
 
+
 class EndOfStreamError(Exception):
   """ Raised when the Webkit server closed the connection unexpectedly. """
+  def __init__(self, msg="Unexpected end of file"):
+    super(Exception, self).__init__(msg)
+
+
+class SocketBuffer(object):
+  """ A convenience class for buffered reads from a socket. """
+  def __init__(self, f):
+    """ `f` is expected to be an open socket. """
+    self.f = f
+    self.buf = b''
+
+  def read_line(self):
+    """ Consume one line from the stream. """
+    while True:
+      newline_idx = self.buf.find(b"\n")
+      if newline_idx >= 0:
+        res = self.buf[:newline_idx]
+        self.buf = self.buf[newline_idx + 1:]
+        return res
+      chunk = self.f.recv(4096)
+      if not chunk:
+        raise EndOfStreamError()
+      self.buf += chunk
+
+  def read(self, n):
+    """ Consume `n` characters from the stream. """
+    while len(self.buf) < n:
+      chunk = self.f.recv(4096)
+      if not chunk:
+        raise EndOfStreamError()
+      self.buf += chunk
+    res, self.buf = self.buf[:n], self.buf[n:]
+    return res
+
 
 class ServerConnection(object):
   """ A connection to a Webkit server.
@@ -450,7 +505,8 @@ class ServerConnection(object):
   def __init__(self, server = None):
     super(ServerConnection, self).__init__()
     self._sock = (server or get_default_server()).connect()
-    self.issue_command("IgnoreSslErrors");
+    self.buf = SocketBuffer(self._sock)
+    self.issue_command("IgnoreSslErrors")
 
   def issue_command(self, cmd, *args):
     """ Sends and receives a message to/from the server """
@@ -459,51 +515,27 @@ class ServerConnection(object):
     for arg in args:
       arg = str(arg)
       self._writeline(str(len(arg)))
-      self._sock.send(arg)
+      self._sock.sendall(arg.encode("utf-8"))
 
     return self._read_response()
 
   def _read_response(self):
     """ Reads a complete response packet from the server """
-    result = self._readline()
+    result = self.buf.read_line().decode("utf-8")
     if not result:
-      raise NoResponseError, "No response received from server."
+      raise NoResponseError("No response received from server.")
 
+    msg = self._read_message()
     if result != "ok":
-      raise InvalidResponseError, self._read_message()
+      raise InvalidResponseError(msg)
 
-    return self._read_message()
+    return msg
 
   def _read_message(self):
     """ Reads a single size-annotated message from the server """
-    size = int(self._readline())
-    if size == 0:
-      return ""
-    else:
-      return self._recvall(size)
-
-  def _recvall(self, size):
-    """ Receive until the given number of bytes is fetched or until EOF (in which
-    case ``EndOfStreamError`` is raised). """
-    result = []
-    while size > 0:
-      data = self._sock.recv(min(8192, size))
-      if not data:
-        raise EndOfStreamError, "Unexpected end of stream."
-      result.append(data)
-      size -= len(data)
-    return ''.join(result)
-
-  def _readline(self):
-    """ Cheap implementation of a readline function that operates on our underlying
-    socket. """
-    res = []
-    while True:
-      c = self._sock.recv(1)
-      if c == "\n":
-        return "".join(res)
-      res.append(c)
+    size = int(self.buf.read_line().decode("utf-8"))
+    return self.buf.read(size).decode("utf-8")
 
   def _writeline(self, line):
     """ Writes a line to the underlying socket. """
-    self._sock.send(line + "\n")
+    self._sock.sendall(line.encode("utf-8") + b"\n")
