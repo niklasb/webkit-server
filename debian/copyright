@@ -1,0 +1,8 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: webkit-server
+Source: https://github.com/niklasb/webkit-server
+
+Files: *
+Copyright: Copyright (c) 2010-2012 thoughtbot, inc.
+License: MIT
+ For details see http://opensource.org/licenses/MIT.
