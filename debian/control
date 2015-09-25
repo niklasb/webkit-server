@@ -1,0 +1,26 @@
+Source: webkit-server
+Maintainer: Niklas Baumstark <niklas.baumstark@gmail.com>
+Section: python
+Priority: optional
+Build-Depends: python-all (>= 2.6.6-3), debhelper (>= 7), qt5-default, libqt5webkit5-dev
+Standards-Version: 3.9.1
+
+Package: python-webkit-server
+Architecture: any
+XB-Python-Version: ${python:Versions}
+Depends: ${misc:Depends}, ${shlibs:Depends}, ${python:Depends}
+Provides: ${python:Provides}
+Description: a Webkit-based, headless web client
+ A standalone version of the Webkit server included in capybara-webkit.
+ .
+ It includes a slim Python wrapper and the following improvements over
+ the original version from thoughtbot:
+ .
+  * Wait command to wait for the current page to load
+  * SetAttribute command to configure certain QWebkit settings
+  * SetHtml command to load custom HTML into the browser
+    (e.g. to execute scripts on web pages scraped by a static scraper)
+  * SetViewportSize command to set the viewport size of the in-memory browser
+ .
+ If you are interested in web scraping using this server,
+ have a look at dryscrape (https://github.com/niklasb/dryscrape).
