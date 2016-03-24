@@ -24,6 +24,10 @@ Python's `site-package` directory):
 If you don't need the Python bindings, you can also use the supplied `build.sh`
 shellscript to build the server only.
 
+### A word about Qt 5.6
+
+The 5.6 version of Qt removes the Qt WebKit module in favor of the new module Qt WebEngine. So far webkit-server has not been ported to WebEngine (and likely won't be in the near future), so Qt <= 5.5 is a requirement.
+
 # Contact, Bugs, Contributions
 
 If you have any problems with this software, don't hesitate to open an 
