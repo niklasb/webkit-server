@@ -513,9 +513,12 @@ class ServerConnection(object):
     self._writeline(cmd)
     self._writeline(str(len(args)))
     for arg in args:
-      arg = str(arg)
+      if type(arg) != str and type(arg) != unicode:
+        arg = str(arg)
+      if type(arg) == unicode:
+        arg = arg.encode("utf-8")
       self._writeline(str(len(arg)))
-      self._sock.sendall(arg.encode("utf-8"))
+      self._sock.sendall(arg)
 
     return self._read_response()
 
@@ -538,4 +541,4 @@ class ServerConnection(object):
 
   def _writeline(self, line):
     """ Writes a line to the underlying socket. """
-    self._sock.sendall(line.encode("utf-8") + b"\n")
+    self._sock.sendall(line + b"\n")
