@@ -540,5 +540,7 @@ class ServerConnection(object):
     return self.buf.read(size).decode("utf-8")
 
   def _writeline(self, line):
+    if type(line) == unicode:
+      line = line.encode("utf-8")
     """ Writes a line to the underlying socket. """
     self._sock.sendall(line + b"\n")
