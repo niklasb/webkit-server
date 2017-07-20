@@ -520,7 +520,7 @@ class ServerConnection(object):
     self._writeline(cmd)
     self._writeline(str(len(args)))
     for arg in args:
-        self.send_arg(arg)
+      self.send_arg(arg)
 
     return self._read_response()
 
