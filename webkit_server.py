@@ -13,6 +13,13 @@ import json
 SERVER_EXEC = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                            'webkit_server'))
 
+if sys.version_info[0] == 2:
+    PY2 = True
+    PY3 = False
+elif sys.version_info[0] == 3:
+    PY2 = False
+    PY3 = True
+
 
 class SelectionMixin(object):
   """ Implements a generic XPath selection for a class providing
@@ -513,11 +520,46 @@ class ServerConnection(object):
     self._writeline(cmd)
     self._writeline(str(len(args)))
     for arg in args:
-      arg = str(arg)
-      self._writeline(str(len(arg)))
-      self._sock.sendall(arg.encode("utf-8"))
+      self.send_arg(arg)
 
     return self._read_response()
+
+  def send_arg(self, arg):
+    """ Send each arg for args in issue_command """
+    arg = self.prepare_for_socket_sendall(arg)
+    self._writeline(str(len(arg)))
+    self._sock.sendall(arg)
+
+  def prepare_for_socket_sendall(self, arg):
+    """ Deal with the unicode and bytes problem in Python 2 and Python 3 for socket.sendall """
+
+    if PY2:
+      if type(arg) != unicode:
+        try:
+          arg = str(arg)
+        except:
+          pass
+
+      # socket.sendall in Python 2 accepts str (bytes)
+      if type(arg) not in (str, unicode):
+        raise TypeError("type({}) should be str (bytes) or unicode, not {}".format(arg, type(arg)))
+      elif type(arg) == unicode:
+        arg = arg.encode("utf-8")
+
+    if PY3:
+      if type(arg) != bytes:
+        try:
+          arg = str(arg)
+        except:
+          pass
+
+      # socket.sendall in Python 3 accepts bytes
+      if type(arg) not in (str, bytes):
+        raise TypeError("type({}) should be str or bytes, not {}".format(arg, type(arg)))
+      elif type(arg) == str:
+        arg = arg.encode("utf-8")
+
+    return arg
 
   def _read_response(self):
     """ Reads a complete response packet from the server """
@@ -538,4 +580,5 @@ class ServerConnection(object):
 
   def _writeline(self, line):
     """ Writes a line to the underlying socket. """
-    self._sock.sendall(line.encode("utf-8") + b"\n")
+    line = self.prepare_for_socket_sendall(line)
+    self._sock.sendall(line + b"\n")
