@@ -513,9 +513,9 @@ class ServerConnection(object):
     self._writeline(cmd)
     self._writeline(str(len(args)))
     for arg in args:
-      arg = str(arg)
+      arg = str(arg).encode("utf-8")
       self._writeline(str(len(arg)))
-      self._sock.sendall(arg.encode("utf-8"))
+      self._sock.sendall(arg)
 
     return self._read_response()
 
