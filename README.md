@@ -1,3 +1,5 @@
+**NOTE: This package is not actively maintained. It uses QtWebkit, which is end-of-life and probably doesn't get security fixes backported. Consider using a similar package like Spynner instead.**
+
 # Overview
 
 **Author:** Niklas Baumstark
