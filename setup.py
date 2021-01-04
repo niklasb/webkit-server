@@ -37,8 +37,8 @@ class build_server(_build):
     try:
       os.makedirs(self.build_purelib)
     except: pass
-    shutil.copy('src/webkit_server', self.build_purelib)
-    shutil.copy('src/webkit_server', self.build_platlib)
+    shutil.copy('src/webkit_server.pro', self.build_purelib)
+    shutil.copy('src/webkit_server.pro', self.build_platlib)
 
 setup(name='webkit-server',
       version='1.0',
